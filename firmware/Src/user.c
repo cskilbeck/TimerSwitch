@@ -1,5 +1,7 @@
 #include "main.h"
 
+extern volatile int number;
+
 uint16_t const max_setup[8] = {
     set_scan_limit(3),
     set_intensity(15),
@@ -48,5 +50,33 @@ void set_number(int x)
     for(int i=0; i<4; ++i) {
         set_digit_n(i, x % 10);
         x /= 10;
+    }
+}
+
+int state = 0;
+
+int const rot_enc_table[16] = {0,1,-1,0,-1,0,0,1,1,0,0,-1,0,-1,1,0};
+
+int pinstate()
+{
+    return ~GPIOA->IDR & 0x3;
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+    state = ((state << 2) | pinstate()) & 0xf;
+    int rot = rot_enc_table[state];
+    if(rot != 0) {
+        encoder_callback(rot);
+    }
+}
+
+void encoder_callback(int x)
+{
+    number += x;
+    if(number < 0) {
+        number += 20000;
+    } else if(number >= 20000) {
+        number -= 20000;
     }
 }

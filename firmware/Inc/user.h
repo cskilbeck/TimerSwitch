@@ -39,3 +39,5 @@ extern SPI_HandleTypeDef hspi1;
 void set_digit_n(int digit, int value);
 void update_digits();
 void set_number(int n);
+
+void encoder_callback(int);
