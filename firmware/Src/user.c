@@ -27,6 +27,7 @@
 
 volatile uint32_t milliseconds = 0;
 volatile int number = 0;
+int display_number = 0;
 
 uint16_t const max_setup[8] = {
     set_scan_limit(3), set_intensity(15), set_decode_mode(0), set_digit(0, 0x0), set_digit(1, 0x0), set_digit(2, 0x0), set_digit(3, 0x0), set_wakeup(1)
@@ -63,11 +64,6 @@ void update_digits()
 
 void set_number(int x)
 {
-    int d = 0;
-    for(int i = 0; i < 4; ++i) {
-        set_digit_n(i, x % 10);
-        x /= 10;
-    }
 }
 
 int state = 0;
@@ -90,6 +86,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         } else if(number >= 20000) {
             number -= 20000;
         }
+        set_number(number >> 1);
     }
 }
 
@@ -103,12 +100,18 @@ void begin()
 
 void loop()
 {
-    set_number(number / 2);
-    digits[2] |= dp;
-    dp ^= 128;
-    update_digits();
-    uint32_t ms = milliseconds + 250;
-    while(milliseconds < ms) {
+    int x = number / 2;
+    if(display_number != x) {
+        display_number = x;
+        int d = 0;
+        for(int i = 0; i < 4; ++i) {
+            set_digit_n(i, x % 10);
+            x /= 10;
+        }
+        update_digits();
+        uint32_t ms = milliseconds + 2;
+//        while(milliseconds < ms) {
+//        }
     }
 }
 
