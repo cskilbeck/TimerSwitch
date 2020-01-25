@@ -44,8 +44,18 @@ uint8_t const seg_digits[10] = { B(2) + B(3) + B(4) + B(5) + B(6) + B(7),
                                  B(1) + B(2) + B(3) + B(4) + B(5) + B(6) + B(7),
                                  B(1) + B(2) + B(4) + B(5) + B(6) + B(7) };
 
-uint16_t const max_setup[8] = { set_scan_limit(3),      set_intensity(15),      set_decode_mode(0),     set_digit(0, 0),
-                                set_digit(1, 0), set_digit(2, 0), set_digit(3, 0), set_wakeup(1) };
+// clang-format off
+uint16_t const max_setup[8] = {
+    set_scan_limit(3),
+    set_intensity(15),
+    set_decode_mode(0),
+    set_digit(0, 0),
+    set_digit(1, 0),
+    set_digit(2, 0),
+    set_digit(3, 0),
+    set_wakeup(1)
+};
+// clang-format on
 
 #undef B
 
@@ -59,23 +69,27 @@ int const rot_enc_table[16] = { 0, 1, -1, 0, -1, 0, 0, 1, 1, 0, 0, -1, 0, -1, 1,
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
     switch(GPIO_Pin) {
-        case ENCODER_A_Pin:
-        case ENCODER_B_Pin:
-            state = ((state << 2) | (~GPIOA->IDR & 0x3)) & 0xf;
-            int rot = rot_enc_table[state];
-            if(rot != 0) {
-                number += rot;
-                if(number < 0) {
-                    number += 20000;
-                } else if(number >= 20000) {
-                    number -= 20000;
-                }
+    case ENCODER_A_Pin:
+    case ENCODER_B_Pin:
+        state = ((state << 2) | (~GPIOA->IDR & 0x3)) & 0xf;
+        int rot = rot_enc_table[state];
+        if(rot != 0) {
+            number += rot;
+            if(number < 0) {
+                number += 20000;
+            } else if(number >= 20000) {
+                number -= 20000;
             }
-            break;
-        case BUTTON_Pin:
-            DEBUG_LED_GPIO_Port->ODR ^= DEBUG_LED_Pin;
+        }
+        break;
+    case BUTTON_Pin:
+        if(milliseconds > last_press)     // work around weird GPIO_EXTI problem
+        {
+            last_press = milliseconds + 1;
             MOSFET_GPIO_Port->ODR ^= MOSFET_Pin;
-            break;
+            DEBUG_LED_GPIO_Port->ODR ^= DEBUG_LED_Pin;
+        }
+        break;
     }
 }
 
