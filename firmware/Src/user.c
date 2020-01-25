@@ -1,14 +1,14 @@
 #include "main.h"
 
 uint16_t const max_setup[8] = {
-    set_wakeup(1),
     set_scan_limit(3),
     set_intensity(15),
     set_decode_mode(0),
-    set_digit(0, 0xff),
-    set_digit(1, 0xf0),
-    set_digit(2, 0x0f),
-    set_digit(3, 0x01)
+    set_digit(0, 0x0),
+    set_digit(1, 0x0),
+    set_digit(2, 0x0),
+    set_digit(3, 0x0),
+    set_wakeup(1)
 };
 
 uint16_t digits[4] = { 0 };
