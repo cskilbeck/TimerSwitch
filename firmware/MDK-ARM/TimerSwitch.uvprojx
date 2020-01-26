@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F030x6</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;           ../Drivers/STM32F0xx_HAL_Driver/Inc;           ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy;           ../Drivers/CMSIS/Device/ST/STM32F0xx/Include;           ../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Inc;                  ../Drivers/STM32F0xx_HAL_Driver/Inc;                  ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy;                  ../Drivers/CMSIS/Device/ST/STM32F0xx/Include;                  ../Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -407,6 +407,26 @@
               <FileName>user.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\src\user.c</FilePath>
+            </File>
+            <File>
+              <FileName>max7219.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\max7219.c</FilePath>
+            </File>
+            <File>
+              <FileName>rotary.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\src\rotary.c</FilePath>
+            </File>
+            <File>
+              <FileName>max7219.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\inc\max7219.h</FilePath>
+            </File>
+            <File>
+              <FileName>rotary.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\inc\rotary.h</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>

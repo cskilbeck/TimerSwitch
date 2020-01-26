@@ -16,5 +16,6 @@ bin/
 *~$*.*
 *.sublime-workspace
 firmware/MDK-ARM/TimerSwitch/
-firmware/*/Backup/
-
+firmware/*/Backup
+pcb/*/History/
+pcb/__Previews/
