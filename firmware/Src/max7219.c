@@ -60,32 +60,49 @@ uint16_t const max_setup[8] = {
 };
 // clang-format on
 
-uint16_t digits[4] = { 0 };
+uint16_t digits[5] = { set_intensity(15) };
+
+static int dirty = 0;
 
 void max7219_init()
 {
     HAL_SPI_Transmit_DMA(&hspi1, (uint8_t *)max_setup, 8);
+    dirty = 0;
 }
 
 void max7219_set_number(int x)
 {
     for(int i = 0; i < 4; ++i) {
-        digits[i] = max7219_cmd(max_Digit0 + i, seg_digits[x % 10]);
+        digits[i + 1] = max7219_cmd(max_Digit0 + i, seg_digits[x % 10]);
         x /= 10;
+    }
+    dirty = 1;
+}
+
+void max7219_set_intensity(int x)
+{
+    x &= 0xf;
+    if(x != (digits[0] & 0xf)) {
+        digits[0] = set_intensity(x & 0xf);
+        dirty = 1;
     }
 }
 
 void max7219_set_hex(int x)
 {
     for(int i = 0; i < 4; ++i) {
-        digits[i] = max7219_cmd(max_Digit0 + i, seg_digits[x & 0xf]);
+        digits[i + 1] = max7219_cmd(max_Digit0 + i, seg_digits[x & 0xf]);
         x >>= 4;
     }
+    dirty = 1;
 }
 
 void max7219_update()
 {
-    while(hdma_spi1_tx.State == HAL_DMA_STATE_BUSY) {
+    if(dirty) {
+        while(hdma_spi1_tx.State == HAL_DMA_STATE_BUSY) {
+        }
+        HAL_SPI_Transmit_DMA(&hspi1, (uint8_t *)digits, 5);
+        dirty = 0;
     }
-    HAL_SPI_Transmit_DMA(&hspi1, (uint8_t *)digits, 4);
 }
