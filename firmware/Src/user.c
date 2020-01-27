@@ -43,9 +43,9 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
         if(rot != 0) {
             number += rot;
             if(number < 0) {
-                number += 20000;
-            } else if(number >= 20000) {
-                number -= 20000;
+                number += 10000;
+            } else if(number >= 10000) {
+                number -= 10000;
             }
         }
     }
@@ -68,10 +68,9 @@ void loop()
         button_pressed = 0;
     }
 
-    int x = number / 2;
-    if(display_number != x) {
-        display_number = x;
-        max7219_set_number(x);
+    if(display_number != number) {
+        display_number = number;
+        max7219_set_number(number);
         max7219_update();
     }
 }

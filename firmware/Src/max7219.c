@@ -27,9 +27,7 @@
 
 #define B(x) (1 << (x - 1))
 
-#define dig_zero (B(2) + B(3) + B(4) + B(5) + B(6) + B(7))
-
-uint8_t const seg_digits[10] = { B(2) + B(3) + B(4) + B(5) + B(6) + B(7),
+uint8_t const seg_digits[16] = { B(2) + B(3) + B(4) + B(5) + B(6) + B(7),
                                  B(5) + B(6),
                                  B(7) + B(6) + B(1) + B(3) + B(4),
                                  B(1) + B(4) + B(5) + B(6) + B(7),
@@ -38,7 +36,14 @@ uint8_t const seg_digits[10] = { B(2) + B(3) + B(4) + B(5) + B(6) + B(7),
                                  B(1) + B(2) + B(3) + B(4) + B(5) + B(7),
                                  B(7) + B(6) + B(5),
                                  B(1) + B(2) + B(3) + B(4) + B(5) + B(6) + B(7),
-                                 B(1) + B(2) + B(4) + B(5) + B(6) + B(7) };
+                                 B(1) + B(2) + B(4) + B(5) + B(6) + B(7),
+                                 B(1) + B(2) + B(3) + B(5) + B(6) + B(7),
+                                 B(1) + B(2) + B(3) + B(4) + B(5),
+                                 B(7) + B(2) + B(3) + B(4),
+                                 B(1) + B(3) + B(4) + B(5) + B(6), 
+                                 B(1) + B(2) + B(3) + B(4) + B(7), 
+                                 B(1) + B(2) + B(3) + B(7)
+};
 
 #undef B
 
@@ -67,6 +72,14 @@ void max7219_set_number(int x)
     for(int i = 0; i < 4; ++i) {
         digits[i] = max7219_cmd(max_Digit0 + i, seg_digits[x % 10]);
         x /= 10;
+    }
+}
+
+void max7219_set_hex(int x)
+{
+    for(int i = 0; i < 4; ++i) {
+        digits[i] = max7219_cmd(max_Digit0 + i, seg_digits[x & 0xf]);
+        x >>= 4;
     }
 }
 
