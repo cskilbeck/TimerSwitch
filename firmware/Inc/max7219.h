@@ -1,7 +1,20 @@
 #pragma once
 
-// init the max7219
-void max7219_init();
+// init the max7219, assumes SPI is setup like:
+//
+// Baud Rate = whatever gets you ~10MHz (not faster)
+// Data Size = 16 bit
+// CLK Polarity = low
+// CLK Phase = 1 edge
+// SS = hardware enabled
+// First Bit = msb
+// TI Mode = disabled
+// CRC Calculation = disabled
+// NSS Pulse Mode = enabled
+
+// also assumes DMA is enabled as 16 bit mem -> peripheral
+
+void max7219_init(SPI_HandleTypeDef *spi_handle);
 
 // set wakeup to 0 (display off) or 1 (display on)
 void max7219_set_wakeup(int x);

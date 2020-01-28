@@ -1,18 +1,26 @@
+//////////////////////////////////////////////////////////////////////
+
 #include "main.h"
 #include "max7219.h"
 #include "rotary.h"
 
-volatile uint32_t ticks = 0;
+//////////////////////////////////////////////////////////////////////
+
+volatile uint32 ticks = 0;
 
 volatile int number = 0;
 int display_number = 0;
 
-uint32_t button_state = 0;
-uint32_t button_history = 0;
+//////////////////////////////////////////////////////////////////////
+
+uint32 button_state = 0;
+uint32 button_history = 0;
 int button_held = 0;
 int button_previous_held = 0;
 int button_pressed = 0;
 int button_released = 0;
+
+//////////////////////////////////////////////////////////////////////
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -30,31 +38,27 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     ticks += 1;
 }
 
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+//////////////////////////////////////////////////////////////////////
+
+void HAL_GPIO_EXTI_Callback(uint16 GPIO_Pin)
 {
-    switch(GPIO_Pin) {
-    case ENCODER_A_Pin:
-    case ENCODER_B_Pin:
-    {
-        int rot = rotary_update();
-        if(rot != 0) {
-            number += rot;
-            if(number < 0) {
-                number += 10000;
-            } else if(number >= 10000) {
-                number -= 10000;
-            }
-        }
-    }
-    break;
+    number += rotary_update();
+    if(number < 0) {
+        number += 10000;
+    } else if(number >= 10000) {
+        number -= 10000;
     }
 }
+
+//////////////////////////////////////////////////////////////////////
 
 void begin()
 {
     HAL_TIM_Base_Start_IT(&htim17);
     max7219_init();
 }
+
+//////////////////////////////////////////////////////////////////////
 
 void loop()
 {
@@ -71,7 +75,6 @@ void loop()
         display_number = number;
         max7219_set_number(number);
     }
-    
+
     max7219_update();
 }
-

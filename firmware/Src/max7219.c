@@ -86,6 +86,8 @@ uint16_t setup_packet[8] = {
 
 static int dirty = 0;    // track if setup_packet changed
 
+SPI_HandleTypeDef *max_spi_handle = null;
+
 //////////////////////////////////////////////////////////////////////
 // poke new command word in setup_packet[]
 
@@ -106,14 +108,15 @@ static void transmit_dma(int n)
     while(hdma_spi1_tx.State == HAL_DMA_STATE_BUSY) {
         // toggle debug line here to see if it's stalling
     }
-    HAL_SPI_Transmit_DMA(&hspi1, (uint8_t *)(setup_packet + n), setup_count - n);
+    HAL_SPI_Transmit_DMA(max_spi_handle, (uint8_t *)(setup_packet + n), setup_count - n);
 }
 
 //////////////////////////////////////////////////////////////////////
 // public function: init the max7219
 
-void max7219_init()
+void max7219_init(SPI_HandleTypeDef *spi_handle)
 {
+    max_spi_handle = spi_handle;
     transmit_dma(setup_base);
     dirty = 0;
 }
