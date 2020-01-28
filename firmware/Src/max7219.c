@@ -64,11 +64,11 @@ uint8_t const seg_digits[16] = { _SL(2) + _SL(3) + _SL(4) + _SL(5) + _SL(6) + _S
 // offsets into setup_packet[]
 enum
 {
-    setup_base = 0,
-    setup_update = 2,
+    setup_base      = 0,
+    setup_update    = 2,
     setup_intensity = 2,
-    setup_wakeup = 3,
-    setup_digit0 = 4
+    setup_wakeup    = 3,
+    setup_digit0    = 4
 }
 
 // clang-format off
@@ -94,8 +94,10 @@ SPI_HandleTypeDef *max_spi_handle = null;
 static void set_entry(int index, int mask, int addr, int value)
 {
     value &= mask;
-    if(value != (digits[index] & mask)) {
+    if(value != (digits[index] & mask))
+    {
         setup_packet[index] = max7219_cmd(addr, value);
+
         dirty = 1;
     }
 }
@@ -105,7 +107,8 @@ static void set_entry(int index, int mask, int addr, int value)
 
 static void transmit_dma(int n)
 {
-    while(hdma_spi1_tx.State == HAL_DMA_STATE_BUSY) {
+    while(hdma_spi1_tx.State == HAL_DMA_STATE_BUSY)
+    {
         // toggle debug line here to see if it's stalling
     }
     HAL_SPI_Transmit_DMA(max_spi_handle, (uint8_t *)(setup_packet + n), setup_count - n);
@@ -142,7 +145,8 @@ void max7219_set_intensity(int x)
 
 void max7219_set_number(uint x)
 {
-    for(int i = 0; i < 4; ++i) {
+    for(int i = 0; i < 4; ++i)
+    {
         set_entry(setup_digit0 + i, 0xff, max_Digit0 + i, seg_digits[x % 10]);
         x /= 10;
     }
@@ -153,7 +157,8 @@ void max7219_set_number(uint x)
 
 void max7219_set_hex(int x)
 {
-    for(int i = 0; i < 4; ++i) {
+    for(int i = 0; i < 4; ++i)
+    {
         set_entry(setup_digit0 + i, 0xff, max_Digit0 + 1, seg_digits[x & 0xf]);
         x >>= 4;
     }
@@ -164,7 +169,8 @@ void max7219_set_hex(int x)
 
 void max7219_update()
 {
-    if(dirty) {
+    if(dirty)
+    {
         transmit_dma(setup_update);
         dirty = 0;
     }
