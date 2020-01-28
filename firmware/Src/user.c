@@ -23,7 +23,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     } else if(button_history == 0xe) {
         button_held = 0;
     }
-    int button_diff = button_state ^ button_previous_held;
+    int button_diff = button_held ^ button_previous_held;
     button_pressed = button_diff & button_held;
     button_released = button_diff & !button_held;
     button_previous_held = button_held;
