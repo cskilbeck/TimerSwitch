@@ -66,17 +66,20 @@ enum
 {
     setup_base      = 0,
     setup_update    = 2,
+
     setup_intensity = 2,
     setup_wakeup    = 3,
-    setup_digit0    = 4
-}
+    setup_digit0    = 4,
+
+    setup_count     = 8
+};
 
 // clang-format off
 uint16_t setup_packet[8] = {
     set_scan_limit(3),
     set_decode_mode(0),
     set_intensity(15),
-    set_wakeup(1)
+    set_wakeup(1),
     set_digit(0, 0),
     set_digit(1, 0),
     set_digit(2, 0),
@@ -84,7 +87,7 @@ uint16_t setup_packet[8] = {
 };
 // clang-format on
 
-static int dirty = 0;    // track if setup_packet changed
+static bool dirty = false;    // track if setup_packet changed
 
 SPI_HandleTypeDef *max_spi_handle = null;
 
@@ -93,12 +96,11 @@ SPI_HandleTypeDef *max_spi_handle = null;
 
 static void set_entry(int index, int mask, int addr, int value)
 {
-    value &= mask;
-    if(value != (digits[index] & mask))
+    uint16 poke = max7219_cmd(addr, value & mask);
+    if(poke != setup_packet[index])
     {
-        setup_packet[index] = max7219_cmd(addr, value);
-
-        dirty = 1;
+        setup_packet[index] = poke;
+        dirty = true;
     }
 }
 
@@ -121,7 +123,7 @@ void max7219_init(SPI_HandleTypeDef *spi_handle)
 {
     max_spi_handle = spi_handle;
     transmit_dma(setup_base);
-    dirty = 0;
+    dirty = true;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -172,6 +174,6 @@ void max7219_update()
     if(dirty)
     {
         transmit_dma(setup_update);
-        dirty = 0;
+        dirty = false;
     }
 }

@@ -63,14 +63,14 @@ void HAL_GPIO_EXTI_Callback(uint16 GPIO_Pin)
 void begin()
 {
     HAL_TIM_Base_Start_IT(&htim17);
-    max7219_init();
+    max7219_init(&hspi1);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void loop()
 {
-    DEBUG_GPIO_Port->BSRR = DEBUG_Pin << (button_state * 16);
+    DEBUG1_GPIO_Port->BSRR = DEBUG1_Pin << (button_state * 16);
 
     if(button_pressed != 0)
     {
@@ -78,7 +78,19 @@ void loop()
         button_pressed = 0;
     }
 
-    max7219_set_intensity(ticks >> 12);
+    int i = ((ticks >> 12) & 63) - 32;
+    if(i < 0) {
+        i = -i;
+    }
+    i -= 16;
+    if(i < -7) {
+        i = -7;
+    }
+    if(i > 7) {
+        i = 7;
+    }
+    i += 8;
+    max7219_set_intensity(i);
 
     if(display_number != number)
     {

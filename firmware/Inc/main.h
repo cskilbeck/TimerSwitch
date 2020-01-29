@@ -66,8 +66,10 @@ void Error_Handler(void);
 #define ENCODER_B_EXTI_IRQn EXTI0_1_IRQn
 #define MOSFET_Pin GPIO_PIN_2
 #define MOSFET_GPIO_Port GPIOA
-#define DEBUG_Pin GPIO_PIN_6
-#define DEBUG_GPIO_Port GPIOA
+#define DEBUG2_Pin GPIO_PIN_3
+#define DEBUG2_GPIO_Port GPIOA
+#define DEBUG1_Pin GPIO_PIN_6
+#define DEBUG1_GPIO_Port GPIOA
 #define BUTTON_Pin GPIO_PIN_9
 #define BUTTON_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */

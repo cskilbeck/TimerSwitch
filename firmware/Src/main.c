@@ -250,7 +250,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, MOSFET_Pin|DEBUG_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, MOSFET_Pin|DEBUG2_Pin|DEBUG1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : ENCODER_A_Pin ENCODER_B_Pin */
   GPIO_InitStruct.Pin = ENCODER_A_Pin|ENCODER_B_Pin;
@@ -258,8 +258,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : MOSFET_Pin DEBUG_Pin */
-  GPIO_InitStruct.Pin = MOSFET_Pin|DEBUG_Pin;
+  /*Configure GPIO pins : MOSFET_Pin DEBUG2_Pin DEBUG1_Pin */
+  GPIO_InitStruct.Pin = MOSFET_Pin|DEBUG2_Pin|DEBUG1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;

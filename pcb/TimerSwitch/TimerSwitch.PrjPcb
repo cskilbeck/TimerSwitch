@@ -106,6 +106,23 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=VDPWSVWH
 
+[Document5]
+DocumentPath=TimerSwitch.PvLib
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=1
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=
+
 [Configuration1]
 Name=Default Configuration
 ParameterCount=0
@@ -176,7 +193,7 @@ OutputDefault3=0
 [OutputGroup3]
 Name=Documentation Outputs
 Description=
-TargetPrinter=Samsung CLP-320 Series (USB001)
+TargetPrinter=Virtual Printer
 PrinterOptions=Record=PrinterOptions|Copies=1|Duplex=1|TrueTypeOptions=3|Collate=1|PrintJobKind=1|PrintWhat=1
 OutputType1=Assembler Source Print
 OutputName1=Assembler Source Prints
@@ -936,12 +953,12 @@ GlobalIndexSortOrder=3
 GlobalIndexSortLocation=0
 
 [PrjClassGen]
-CompClassManualEnabled=0
+CompClassManualEnabled=1
 CompClassManualRoomEnabled=0
 NetClassAutoBusEnabled=0
 NetClassAutoCompEnabled=0
 NetClassAutoNamedHarnessEnabled=0
-NetClassManualEnabled=0
+NetClassManualEnabled=1
 NetClassSeparateForBusSections=0
 
 [LibraryUpdateOptions]
@@ -969,16 +986,18 @@ PartTypes=0
 
 [NetInfos]
 Net1=NetName=VCC5|NetColor=$00FF6EFF
-Net2=NetName=EARTH|NetColor=$0000BE00
-Net3=NetName=VCC3V5|NetColor=clYellow
-Net4=NetName=NEUTRAL|NetColor=$00FFFF6E
-Net5=NetName=NetPSU_2|NetColor=$00FFFF6E
-Net6=NetName=COIL_LOW|NetColor=$008DC8FF
-Net7=NetName=NetRELAY1_3|NetColor=$00220EEE
-Net8=NetName=LINE|NetColor=$006E6EFF
-Net9=NetName=NetPSU_1|NetColor=$006E6EFF
-Net10=NetName=GND|NetColor=$006EFF6E
-Net11=NetName=ENABLE|NetColor=$000083FD
+Net2=NetName=LINE_HOT|NetColor=$006A00A1
+Net3=NetName=GND|NetColor=$006EFF6E
+Net4=NetName=ENABLE|NetColor=$000083FD
+Net5=NetName=EARTH|NetColor=$0000BE00
+Net6=NetName=NEUTRAL|NetColor=$00FFFF6E
+Net7=NetName=VCC3V5|NetColor=clYellow
+Net8=NetName=NetPSU_2|NetColor=$00FFFF6E
+Net9=NetName=COIL_LOW|NetColor=$008DC8FF
+Net10=NetName=NetRELAY1_3|NetColor=$00220EEE
+Net11=NetName=LINE|NetColor=$006E6EFF
+Net12=NetName=NetPSU_1|NetColor=$006E6EFF
+Net13=NetName=LINE_IN|NetColor=$00220EEE
 
 [Comparison Options]
 ComparisonOptions0=Kind=Net|MinPercent=75|MinMatch=3|ShowMatch=-1|Confirm=-1|UseName=-1|InclAllRules=0
@@ -987,4 +1006,7 @@ ComparisonOptions2=Kind=Component Class|MinPercent=75|MinMatch=3|ShowMatch=-1|Co
 ComparisonOptions3=Kind=Rule|MinPercent=75|MinMatch=3|ShowMatch=-1|Confirm=-1|UseName=-1|InclAllRules=0
 ComparisonOptions4=Kind=Differential Pair|MinPercent=50|MinMatch=1|ShowMatch=0|Confirm=0|UseName=0|InclAllRules=0
 ComparisonOptions5=Kind=Code Memory|MinPercent=75|MinMatch=3|ShowMatch=-1|Confirm=-1|UseName=-1|InclAllRules=0
+
+[SmartPDF]
+PageOptions=Record=PageOptions|CenterHorizontal=True|CenterVertical=True|PrintScale=1.00|XCorrection=1.00|YCorrection=1.00|PrintKind=1|BorderSize=5000000|LeftOffset=0|BottomOffset=0|Orientation=2|PaperLength=1000|PaperWidth=1000|Scale=100|PaperSource=7|PrintQuality=-3|MediaType=1|DitherType=10|PrintScaleMode=1|PaperKind=A4|PaperIndex=9
 
