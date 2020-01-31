@@ -7,8 +7,9 @@
 //////////////////////////////////////////////////////////////////////
 
 volatile uint32 ticks = 0;
-volatile int    number = 0;
+volatile int    rotation = 0;
 
+int number = 0;
 int display_number = 0;
 
 //////////////////////////////////////////////////////////////////////
@@ -47,15 +48,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 void HAL_GPIO_EXTI_Callback(uint16 GPIO_Pin)
 {
-    number += rotary_update();
-    if(number < 0)
-    {
-        number += 10000;
-    }
-    else if(number >= 10000)
-    {
-        number -= 10000;
-    }
+    rotation += rotary_update();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -80,9 +73,20 @@ void loop()
         button_pressed = 0;
     }
 
-    int i = min(7, max(-7, abs(((ticks >> 12) & 63) - 32) - 16)) + 8;
+    int i = min(7, max(-7, abs((((int)ticks >> 12) & 63) - 32) - 16)) + 8;
 
     max7219_set_intensity(i);
+
+    number += rotation;
+    rotation = 0;
+    if(number < 0)
+    {
+        number += 10000;
+    }
+    else if(number >= 10000)
+    {
+        number -= 10000;
+    }
 
     if(display_number != number)
     {

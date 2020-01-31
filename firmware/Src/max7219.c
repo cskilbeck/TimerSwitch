@@ -64,14 +64,14 @@ uint8_t const seg_digits[16] = { _SL(2) + _SL(3) + _SL(4) + _SL(5) + _SL(6) + _S
 // offsets into setup_packet[]
 enum
 {
-    setup_base      = 0,
-    setup_update    = 2,
+    setup_base = 0,
+    setup_update = 2,
 
     setup_intensity = 2,
-    setup_wakeup    = 3,
-    setup_digit0    = 4,
+    setup_wakeup = 3,
+    setup_digit0 = 4,
 
-    setup_count     = 8
+    setup_count = 8
 };
 
 // clang-format off
@@ -123,7 +123,7 @@ void max7219_init(SPI_HandleTypeDef *spi_handle)
 {
     max_spi_handle = spi_handle;
     transmit_dma(setup_base);
-    dirty = true;
+    dirty = false;
 }
 
 //////////////////////////////////////////////////////////////////////
