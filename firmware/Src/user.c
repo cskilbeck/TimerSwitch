@@ -70,6 +70,8 @@ void begin()
 
 void loop()
 {
+    __WFI();
+
     DEBUG1_GPIO_Port->BSRR = DEBUG1_Pin << (button_state * 16);
 
     if(button_pressed != 0)
@@ -78,18 +80,8 @@ void loop()
         button_pressed = 0;
     }
 
-    int i = ((ticks >> 12) & 63) - 32;
-    if(i < 0) {
-        i = -i;
-    }
-    i -= 16;
-    if(i < -7) {
-        i = -7;
-    }
-    if(i > 7) {
-        i = 7;
-    }
-    i += 8;
+    int i = min(7, max(-7, abs(((ticks >> 12) & 63) - 32) - 16)) + 8;
+
     max7219_set_intensity(i);
 
     if(display_number != number)
