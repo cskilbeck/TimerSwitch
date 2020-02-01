@@ -140,6 +140,23 @@ DItemRevisionGUID=
 GenerateClassCluster=0
 DocumentUniqueId=
 
+[Document7]
+DocumentPath=TimerSwitch.OutJob
+AnnotationEnabled=1
+AnnotateStartValue=1
+AnnotationIndexControlEnabled=0
+AnnotateSuffix=
+AnnotateScope=All
+AnnotateOrder=-1
+DoLibraryUpdate=1
+DoDatabaseUpdate=1
+ClassGenCCAutoEnabled=1
+ClassGenCCAutoRoomEnabled=1
+ClassGenNCAutoScope=None
+DItemRevisionGUID=
+GenerateClassCluster=0
+DocumentUniqueId=
+
 [Configuration1]
 Name=Default Configuration
 ParameterCount=0
@@ -1004,10 +1021,10 @@ PartTypes=0
 [NetInfos]
 Net1=NetName=VCC5|NetColor=$00FF6EFF
 Net2=NetName=LINE_HOT|NetColor=$006A00A1
-Net3=NetName=NEUTRAL|NetColor=$00FFFF6E
-Net4=NetName=GND|NetColor=$006EFF6E
-Net5=NetName=ENABLE|NetColor=$000083FD
-Net6=NetName=EARTH|NetColor=$0000BE00
+Net3=NetName=EARTH|NetColor=$0000BE00
+Net4=NetName=NEUTRAL|NetColor=$00FFFF6E
+Net5=NetName=GND|NetColor=$006EFF6E
+Net6=NetName=ENABLE|NetColor=$000083FD
 Net7=NetName=VCC3V5|NetColor=clYellow
 Net8=NetName=NetPSU_2|NetColor=$00FFFF6E
 Net9=NetName=COIL_LOW|NetColor=$008DC8FF
