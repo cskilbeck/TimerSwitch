@@ -15,7 +15,9 @@ int display_number = 0;
 
 //////////////////////////////////////////////////////////////////////
 
-volatile button_t button(BUTTON_GPIO_Port, 9);
+constexpr uintptr GPIO_PORT_A = 0x48000000UL;
+
+button_t<GPIO_PORT_A, 9, 32> button;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -44,16 +46,38 @@ extern "C" void begin()
 
 //////////////////////////////////////////////////////////////////////
 
+struct button_state_t
+{
+    int held;
+    int previous;
+    int pressed;
+    int released;
+
+    void update(int new_state)
+    {
+        held = new_state;
+        int change = held ^ previous;
+        previous = held;
+        pressed = change && held;
+        released = change && !held;
+    }
+};
+
+button_state_t button_state;
+
+//////////////////////////////////////////////////////////////////////
+
 extern "C" void loop()
 {
     __WFI();
 
-    DEBUG1_GPIO_Port->BSRR = DEBUG1_Pin << (button_state * 16);
+    button_state.update(button.down);
 
-    if(button_pressed != 0)
+    DEBUG1_GPIO_Port->BSRR = DEBUG1_Pin << (button_state.held * 16);
+
+    if(button_state.pressed != 0)
     {
         MOSFET_GPIO_Port->ODR ^= MOSFET_Pin;
-        button_pressed = 0;
     }
 
     int i = min(7, max(-7, abs((((int)ticks >> 12) & 63) - 32) - 16)) + 8;
