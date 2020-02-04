@@ -7,10 +7,8 @@
 
 template <uintptr gpio_port, int bit_num, int history_len> struct button_t
 {
-    static_assert(history_len <= 32 && history_len >= 2, "Must use 2..32 for history");
-
-    // call this at, say, 10KHz
-    void update()
+    // call this at, say, 1KHz
+    void read()
     {
         // for masking off old ones readings
         constexpr uint32 mask = static_cast<uint32>((1llu << history_len) - 1);
@@ -33,30 +31,28 @@ template <uintptr gpio_port, int bit_num, int history_len> struct button_t
         down = int((down || on) && !off);
     }
 
+    // call this in main loop
+    void update()
+    {
+        held = down != 0;
+        bool change = held != previous;
+        previous = held;
+        pressed = change && held;
+        released = change && !held;
+    }
+
+    bool held;
+    bool previous;
+    bool pressed;
+    bool released;
+
+private:
+    
+    static_assert(history_len <= 32 && history_len >= 2, "Must use 2..32 for history");
+
     // track last 32 states
     uint32 history{ 0 };
 
     // current status of button, 0 or 1
     volatile int down;
 };
-
-//////////////////////////////////////////////////////////////////////
-// button state, call update in main loop
-
-struct button_state_t
-{
-    bool held;
-    bool previous;
-    bool pressed;
-    bool released;
-
-    void update(int new_state)
-    {
-        held = new_state != 0;
-        bool change = held != previous;
-        previous = held;
-        pressed = change && held;
-        released = change && !held;
-    }
-};
-
