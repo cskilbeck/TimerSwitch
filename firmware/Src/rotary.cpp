@@ -8,7 +8,6 @@ static int state = 0;
 uint8_t    store = 0;
 
 //////////////////////////////////////////////////////////////////////
-
 // Valid transitions are:
 // 1    00 .. 01
 // 2    00 .. 10
@@ -37,7 +36,7 @@ int rotary_update()
     state = ((state << 2) | inputs) & 0xf;
 
     // many states are invalid (noisy switches) so ignore them
-    if(((valid_state_mask >> state) & 1) != 0)
+    if((valid_state_mask & (1 << state)) != 0)
     {
         // certain state patterns mean rotation happened
         store = (store << 4) | state;

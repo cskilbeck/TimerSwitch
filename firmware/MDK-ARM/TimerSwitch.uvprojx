@@ -138,7 +138,7 @@
             <DriverSelection>4107</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
-          <Flash2>STLink\ST-LINKIII-KEIL_SWO.dll</Flash2>
+          <Flash2>BIN\UL2CM3.DLL</Flash2>
           <Flash3></Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
@@ -339,7 +339,7 @@
               <MiscControls></MiscControls>
               <Define>USE_HAL_DRIVER,STM32F030x6</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;                   ../Drivers/STM32F0xx_HAL_Driver/Inc;                   ../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy;                   ../Drivers/CMSIS/Device/ST/STM32F0xx/Include;                   ../Drivers/CMSIS/Include</IncludePath>
+              <IncludePath>../Inc;../Drivers/STM32F0xx_HAL_Driver/Inc;../Drivers/STM32F0xx_HAL_Driver/Inc/Legacy;../Drivers/CMSIS/Device/ST/STM32F0xx/Include;../Drivers/CMSIS/Include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -404,21 +404,6 @@
               <FilePath>..\inc\user.h</FilePath>
             </File>
             <File>
-              <FileName>user.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\user.c</FilePath>
-            </File>
-            <File>
-              <FileName>max7219.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\max7219.c</FilePath>
-            </File>
-            <File>
-              <FileName>rotary.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\src\rotary.c</FilePath>
-            </File>
-            <File>
               <FileName>max7219.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\inc\max7219.h</FilePath>
@@ -442,6 +427,26 @@
               <FileName>stm32f0xx_hal_msp.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Src/stm32f0xx_hal_msp.c</FilePath>
+            </File>
+            <File>
+              <FileName>user.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\Src\user.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>max7219.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\Src\max7219.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>rotary.cpp</FileName>
+              <FileType>8</FileType>
+              <FilePath>..\Src\rotary.cpp</FilePath>
+            </File>
+            <File>
+              <FileName>button.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\Inc\button.h</FilePath>
             </File>
           </Files>
         </Group>

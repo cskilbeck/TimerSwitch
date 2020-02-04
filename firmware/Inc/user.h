@@ -1,31 +1,45 @@
+//////////////////////////////////////////////////////////////////////
+
 #pragma once
 
-#define null 0
+//////////////////////////////////////////////////////////////////////
+// C bit for interfacing with main.c
 
-typedef unsigned int uint;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-typedef uint64_t uint64;
-typedef uint32_t uint32;
-typedef uint16_t uint16;
-typedef uint8_t  uint8;
-typedef uint8_t  byte;
-
-typedef int64_t int64;
-typedef int32_t int32;
-typedef int16_t int16;
-typedef int8_t  int8;
-
-typedef int bool;
-
-#define true 1
-#define false 0
+//////////////////////////////////////////////////////////////////////
 
 extern SPI_HandleTypeDef hspi1;
 extern DMA_HandleTypeDef hdma_spi1_tx;
 extern TIM_HandleTypeDef htim17;
 
-void begin();
-void loop();
+//////////////////////////////////////////////////////////////////////
+
+void user_main();
+
+//////////////////////////////////////////////////////////////////////
+// C++ only from here
+
+#ifdef __cplusplus
+}
+
+//////////////////////////////////////////////////////////////////////
+
+constexpr nullptr_t null = nullptr;
+
+using uint = unsigned int;
+using uint64 = uint64_t;
+using uint32 = uint32_t;
+using uint16 = uint16_t;
+using uint8 = uint8_t;
+using byte = uint8_t;
+using int64 = int64_t;
+using int32 = int32_t;
+using int16 = int16_t;
+using int8 = int8_t;
+using uintptr = uint32_t;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -47,3 +61,23 @@ inline int max(int x, int y)
 {
     return (x > y) ? x : y;
 }
+
+//////////////////////////////////////////////////////////////////////
+
+inline int sgn(int x)
+{
+    return (x >> 31) | (x != 0);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+inline int atomic_read_clear(int volatile *addr)
+{
+    __disable_irq();
+ 	int ret = *addr;
+    *addr = 0;
+    __enable_irq();
+    return ret;
+}
+
+#endif // __cplusplus
