@@ -17,8 +17,7 @@ extern TIM_HandleTypeDef htim17;
 
 //////////////////////////////////////////////////////////////////////
 
-void begin();
-void loop();
+void user_main();
 
 //////////////////////////////////////////////////////////////////////
 // C++ only from here
@@ -72,4 +71,17 @@ inline int sgn(int x)
 
 //////////////////////////////////////////////////////////////////////
 
-#endif
+inline uint32_t atomic_read_clear(uint32_t volatile *addr)
+{
+	uint32_t ret;
+	__asm__ __volatile__("   mov     %2, #0\n"
+			     "   cpsid   i\n"
+			     "   ldr     %0, [%1]\n"
+			     "   str     %2, [%1]\n"
+			     "   cpsie   i\n"
+			     : "=r" (ret)
+			     : "r" (addr), "r" (0) : "cc");
+	return ret;
+}
+
+#endif // __cplusplus

@@ -3,6 +3,7 @@
 #pragma once
 
 //////////////////////////////////////////////////////////////////////
+// the actual button, call update() in ~10KHz timer ISR
 
 template <uintptr gpio_port, int bit_num, int history_len> struct button_t
 {
@@ -38,3 +39,24 @@ template <uintptr gpio_port, int bit_num, int history_len> struct button_t
     // current status of button, 0 or 1
     volatile int down;
 };
+
+//////////////////////////////////////////////////////////////////////
+// button state, call update in main loop
+
+struct button_state_t
+{
+    bool held;
+    bool previous;
+    bool pressed;
+    bool released;
+
+    void update(int new_state)
+    {
+        held = new_state != 0;
+        bool change = held != previous;
+        previous = held;
+        pressed = change && held;
+        released = change && !held;
+    }
+};
+
