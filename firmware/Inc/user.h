@@ -71,17 +71,13 @@ inline int sgn(int x)
 
 //////////////////////////////////////////////////////////////////////
 
-inline uint32_t atomic_read_clear(uint32_t volatile *addr)
+inline int atomic_read_clear(int volatile *addr)
 {
-	uint32_t ret;
-	__asm__ __volatile__("   mov     %2, #0\n"
-			     "   cpsid   i\n"
-			     "   ldr     %0, [%1]\n"
-			     "   str     %2, [%1]\n"
-			     "   cpsie   i\n"
-			     : "=r" (ret)
-			     : "r" (addr), "r" (0) : "cc");
-	return ret;
+    __disable_irq();
+ 	int ret = *addr;
+    *addr = 0;
+    __enable_irq();
+    return ret;
 }
 
 #endif // __cplusplus

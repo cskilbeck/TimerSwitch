@@ -19,17 +19,17 @@ template <uintptr gpio_port, int bit_num, int history_len> struct button_t
         auto port = reinterpret_cast<volatile GPIO_TypeDef *>(gpio_port);
 
         // get gpio state
-        int bit = ((port->IDR) >> bit_num) & 1;
-
+        int bit = (~port->IDR >> bit_num) & 1;
+        
         // shift into history, check for a run of ones
         history = ((history << 1) | bit) & mask;
-        bool on = (history & (history + 1)) != 0;
+        bool on = (history & (history + 1)) == 0;
 
         // alternative history, check for a run of zeros
-        history = ~history & mask;
-        bool off = (history & (history + 1)) != 0;
+        int h = ~history & mask;
+        bool off = (h & (h + 1)) == 0;
 
-        // update button state
+        // update button state to 0 or 1
         down = int((down || on) && !off);
     }
 
