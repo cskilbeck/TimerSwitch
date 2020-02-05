@@ -7,21 +7,18 @@
 
 //////////////////////////////////////////////////////////////////////
 
-constexpr uintptr GPIO_PORT_A = 0x48000000UL;
-constexpr int     BUTTON_BIT = 9;
-
 volatile uint32 ticks = 0;
 volatile int    rotation = 0;
 int             number = 0;
 
-button_t<GPIO_PORT_A, BUTTON_BIT, 32> button;
+button_t<32> button;
 
 //////////////////////////////////////////////////////////////////////
 // 1KHz timer ISR
 
 extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    button.read();
+    button.read((~GPIOA->IDR >> BUTTON_BIT) & 1);
     ticks += 1;
 }
 
@@ -49,7 +46,7 @@ extern "C" void user_main()
         button.update();
 
         // debug button state on DEBUG1
-        DEBUG1_GPIO_Port->BSRR = DEBUG1_Pin << (button.held ? 16 : 0);
+        DEBUG1_GPIO_Port->BSRR = DEBUG1_Pin << (button.down ? 16 : 0);
 
         // button toggles relay
         if(button.pressed)
