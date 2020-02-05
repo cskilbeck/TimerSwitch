@@ -143,6 +143,26 @@ void max7219_set_intensity(int x)
 }
 
 //////////////////////////////////////////////////////////////////////
+// public function: set decimal points (low 4 bits of x)
+
+__volatile__ void max7219_set_dp(int x)
+{
+    uint16 *p = setup_packet + setup_digit0;
+    x <<= 7;
+    for(int i=0; i<4; ++i)
+    {
+        uint16 n = (*p & 0xff7f) | (x & 0x80);
+        if(n != *p)
+        {
+            *p = n;
+            dirty = true;
+        }
+        p += 1;
+        x >>= 1;
+    }
+}
+
+//////////////////////////////////////////////////////////////////////
 // public function: set decimal number (0..9999)
 
 void max7219_set_number(uint x)

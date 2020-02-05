@@ -18,7 +18,7 @@ button_t<32> button;
 
 extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-    button.read((~GPIOA->IDR >> BUTTON_BIT) & 1);
+    button.read((~GPIOA->IDR >> 9) & 1);
     ticks += 1;
 }
 
@@ -68,6 +68,7 @@ extern "C" void user_main()
             number -= 10000;
         }
         max7219_set_number(number);
+        max7219_set_dp(1 << 2);
         max7219_update();
     }
 }

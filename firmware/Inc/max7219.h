@@ -22,6 +22,9 @@ void max7219_set_wakeup(int x);
 // set led intensity (0..15)
 void max7219_set_intensity(int x);
 
+// set decimal points (low 4 bits of x)
+void max7219_set_dp(int x);
+
 // set decimal number (0..9999)
 void max7219_set_number(uint x);
 

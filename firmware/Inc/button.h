@@ -35,15 +35,20 @@ template <int history_len> struct button_t
         released = change && !held;
     }
 
+    // current status of button
+    volatile bool down;
+
+    // status at last update()
     bool previous;
+
+    // was it pressed since last update()
     bool pressed;
+    
+    // was it released since last update()
     bool released;
 
 private:
     static_assert(history_len <= 32 && history_len >= 2, "Must use 2..32 for history len");
-
-    // current status of button
-    volatile bool down;
 
     // track last 32 states
     uint32 history{ 0 };
