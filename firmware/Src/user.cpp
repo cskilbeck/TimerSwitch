@@ -54,9 +54,6 @@ extern "C" void user_main()
             MOSFET_GPIO_Port->ODR ^= MOSFET_Pin;
         }
 
-        // pulse display brightness
-        max7219_set_intensity(min(7, max(-7, abs((((int)ticks >> 9) & 63) - 32) - 16)) + 8);
-
         // update number
         number += atomic_read_clear(&rotation);
         if(number < 0)
@@ -67,8 +64,15 @@ extern "C" void user_main()
         {
             number -= 10000;
         }
+
+        // update display
         max7219_set_number(number);
         max7219_set_dp(1 << 2);
+
+        // pulse brightness
+        max7219_set_intensity(min(7, max(-7, abs((((int)ticks >> 9) & 63) - 32) - 16)) + 8);
+
+        // send to driver
         max7219_update();
     }
 }
