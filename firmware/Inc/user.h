@@ -71,11 +71,11 @@ inline int sgn(int x)
 
 //////////////////////////////////////////////////////////////////////
 
-inline int atomic_read_clear(int volatile *addr)
+inline int atomic_exchange(int volatile *addr, int new_value)
 {
     __disable_irq();
  	int ret = *addr;
-    *addr = 0;
+    *addr = new_value;
     __enable_irq();
     return ret;
 }

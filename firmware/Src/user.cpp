@@ -55,7 +55,7 @@ extern "C" void user_main()
         }
 
         // update number
-        number += atomic_read_clear(&rotation);
+        number += atomic_exchange(&rotation, 0);
         if(number < 0)
         {
             number += 10000;
