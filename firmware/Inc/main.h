@@ -32,7 +32,13 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#ifdef __cplusplus
+}
+#endif
 #include "user.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -50,6 +56,8 @@ extern "C" {
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -58,20 +66,24 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define ENCODER_A_Pin GPIO_PIN_0
-#define ENCODER_A_GPIO_Port GPIOA
-#define ENCODER_A_EXTI_IRQn EXTI0_1_IRQn
-#define ENCODER_B_Pin GPIO_PIN_1
-#define ENCODER_B_GPIO_Port GPIOA
-#define ENCODER_B_EXTI_IRQn EXTI0_1_IRQn
+#define DEBUG1_Pin GPIO_PIN_0
+#define DEBUG1_GPIO_Port GPIOF
+#define DEBUG2_Pin GPIO_PIN_1
+#define DEBUG2_GPIO_Port GPIOF
+#define BTN_Pin GPIO_PIN_0
+#define BTN_GPIO_Port GPIOA
 #define MOSFET_Pin GPIO_PIN_2
 #define MOSFET_GPIO_Port GPIOA
-#define DEBUG2_Pin GPIO_PIN_3
-#define DEBUG2_GPIO_Port GPIOA
-#define DEBUG1_Pin GPIO_PIN_6
-#define DEBUG1_GPIO_Port GPIOA
-#define BUTTON_Pin GPIO_PIN_9
-#define BUTTON_GPIO_Port GPIOA
+#define ROTARYA_Pin GPIO_PIN_6
+#define ROTARYA_GPIO_Port GPIOA
+#define ROTARYA_EXTI_IRQn EXTI4_15_IRQn
+#define ROTARYB_Pin GPIO_PIN_1
+#define ROTARYB_GPIO_Port GPIOB
+#define ROTARYB_EXTI_IRQn EXTI0_1_IRQn
+#define BUZZA_Pin GPIO_PIN_9
+#define BUZZA_GPIO_Port GPIOA
+#define BUZZB_Pin GPIO_PIN_10
+#define BUZZB_GPIO_Port GPIOA
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */

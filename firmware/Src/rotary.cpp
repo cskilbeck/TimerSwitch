@@ -26,13 +26,12 @@ uint8_t    store = 0;
 // 11 .. 10 .. 00 is one way
 // 00 .. 10 .. 11 is the other way
 
-// So:
+// So:  
 // E8 = 11,10 .. 10,00  --> one way
 // 2B = 00,10 .. 10,11  <-- other way
 
-int rotary_update()
+int rotary_update(int inputs)
 {
-    uint32_t inputs = ~GPIOA->IDR & 0x3;
     state = ((state << 2) | inputs) & 0xf;
 
     // many states are invalid (noisy switches) so ignore them

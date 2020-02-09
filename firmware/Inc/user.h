@@ -14,6 +14,7 @@ extern "C" {
 extern SPI_HandleTypeDef hspi1;
 extern DMA_HandleTypeDef hdma_spi1_tx;
 extern TIM_HandleTypeDef htim17;
+extern TIM_HandleTypeDef htim1 ;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -67,6 +68,13 @@ inline int max(int x, int y)
 inline int sgn(int x)
 {
     return (x >> 31) | (x != 0);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+template <typename T, uint32 N> static constexpr inline uint32 countof(T const (&)[N])
+{
+    return N;
 }
 
 //////////////////////////////////////////////////////////////////////

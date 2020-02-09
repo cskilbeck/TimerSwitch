@@ -4,5 +4,6 @@
 
 //////////////////////////////////////////////////////////////////////
 // call this when either input line changes
+// low 2 bits of `inputs` is gpio state
 
-int rotary_update();
+int rotary_update(int inputs);
