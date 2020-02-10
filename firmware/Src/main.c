@@ -45,6 +45,7 @@ SPI_HandleTypeDef hspi1;
 DMA_HandleTypeDef hdma_spi1_tx;
 
 TIM_HandleTypeDef htim1;
+TIM_HandleTypeDef htim14;
 TIM_HandleTypeDef htim17;
 
 /* USER CODE BEGIN PV */
@@ -57,6 +58,7 @@ static void MX_DMA_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_TIM17_Init(void);
 static void MX_TIM1_Init(void);
+static void MX_TIM14_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -99,6 +101,7 @@ int main(void)
   MX_SPI1_Init();
   MX_TIM17_Init();
   MX_TIM1_Init();
+  MX_TIM14_Init();
   /* USER CODE BEGIN 2 */
     user_main();
   /* USER CODE END 2 */
@@ -209,7 +212,7 @@ static void MX_TIM1_Init(void)
 
   /* USER CODE END TIM1_Init 1 */
   htim1.Instance = TIM1;
-  htim1.Init.Prescaler = 999;
+  htim1.Init.Prescaler = 9;
   htim1.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim1.Init.Period = 23999;
   htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -260,6 +263,37 @@ static void MX_TIM1_Init(void)
 }
 
 /**
+  * @brief TIM14 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM14_Init(void)
+{
+
+  /* USER CODE BEGIN TIM14_Init 0 */
+
+  /* USER CODE END TIM14_Init 0 */
+
+  /* USER CODE BEGIN TIM14_Init 1 */
+
+  /* USER CODE END TIM14_Init 1 */
+  htim14.Instance = TIM14;
+  htim14.Init.Prescaler = 0;
+  htim14.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim14.Init.Period = 48000;
+  htim14.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim14.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_ENABLE;
+  if (HAL_TIM_Base_Init(&htim14) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM14_Init 2 */
+
+  /* USER CODE END TIM14_Init 2 */
+
+}
+
+/**
   * @brief TIM17 Initialization Function
   * @param None
   * @retval None
@@ -302,7 +336,7 @@ static void MX_DMA_Init(void)
 
   /* DMA interrupt init */
   /* DMA1_Channel2_3_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel2_3_IRQn, 2, 0);
+  HAL_NVIC_SetPriority(DMA1_Channel2_3_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
 
 }
