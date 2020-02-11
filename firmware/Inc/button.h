@@ -7,19 +7,24 @@
 
 template <int history_len> struct button_t
 {
-    // call this at, say, 1..100 KHz with state of GPIO input in `bit`
+    inline bool is_run(uint32 x)
+    {
+        return x != 0 && (x & (x + 1)) == 0;
+    }
+
+    // call this at, say, 1..100 KHz with state of GPIO input in `bit` (0 or 1)
     void read(int bit)
     {
         // for masking off old readings
         constexpr uint32 mask = static_cast<uint32>((1llu << history_len) - 1);
 
         // shift into history, check for a run of ones
-        history = ((history << 1) | (bit & 1)) & mask;
-        bool on = (history & (history + 1)) == 0;
+        history = ((history << 1) | bit) & mask;
+        bool on = is_run(history);
 
         // check for a run of zeros
         int  h = ~history & mask;
-        bool off = (h & (h + 1)) == 0;
+        bool off = is_run(h);
 
         // set button state
         down = (down || on) && !off;
@@ -30,9 +35,9 @@ template <int history_len> struct button_t
     {
         bool held = down;
         bool change = held != previous;
-        previous = held;
         pressed = change && held;
         released = change && !held;
+        previous = held;
     }
 
     // current status of button

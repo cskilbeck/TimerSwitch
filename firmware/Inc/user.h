@@ -45,6 +45,41 @@ using uintptr = uint32_t;
 
 //////////////////////////////////////////////////////////////////////
 
+inline void gpio_set(GPIO_TypeDef *gpio, uint32 pins)
+{
+    gpio->BSRR = pins;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+inline void gpio_set_clear(GPIO_TypeDef *gpio, uint32 on_pins, uint32 off_pins)
+{
+    gpio->BSRR = on_pins | (off_pins << 16);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+inline void gpio_clear(GPIO_TypeDef *gpio, uint32 pins)
+{
+    gpio->BRR = pins;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+inline void gpio_toggle(GPIO_TypeDef *gpio, uint32 pins)
+{
+    gpio->ODR ^= pins;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+inline uint32 gpio_get(GPIO_TypeDef *gpio, uint32 pins)
+{
+    return gpio->IDR & pins;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void *__builtin_memcpy(void *destination, void const *source, size_t num);
 int _builtin_memcmp(void const *ptr1, void const *ptr2, size_t num);
 

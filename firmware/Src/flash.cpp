@@ -91,30 +91,34 @@ int flash_unlock();
 #include <stdio.h>
 #define log printf
 #else
-void dummy(...)
+void        dummy(...)
 {
 }
-#define log     \
-    if(false) { \
-    } else      \
+#define log   \
+    if(false) \
+    {         \
+    }         \
+    else      \
         dummy
 #endif
 
 //////////////////////////////////////////////////////////////////////
 // call a flash function and bomb if it doesn't go well
 
-#define check(x)                                                   \
-    {                                                              \
-        int r = (x);                                               \
-        if(r != flash::ok) {                                       \
+#define check(x)                                                \
+    {                                                           \
+        int r = (x);                                            \
+        if(r != flash::ok)                                      \
+        {                                                       \
             log("Error %d (%s)\n", r, flash::error_message(r)); \
-            return r;                                              \
-        }                                                          \
+            return r;                                           \
+        }                                                       \
     }
 
 //////////////////////////////////////////////////////////////////////
 
-namespace {
+namespace
+{
 
 //////////////////////////////////////////////////////////////////////
 
@@ -122,7 +126,11 @@ char const *flash_error_strings[] = { "ok", "bad_id", "not_found", "bad_len", "w
 
 //////////////////////////////////////////////////////////////////////
 
-enum page_state { active = 0x5555, empty = 0xffff };
+enum page_state
+{
+    active = 0x5555,
+    empty = 0xffff
+};
 
 int const page_size_in_uint16_ts = page_size / sizeof(uint16_t);
 
@@ -220,8 +228,10 @@ uint16_t *next(uint16_t *cur)
 
 int blank_check(uint16_t *p, uint16_t *e)
 {
-    while(p < e) {
-        if(*p++ != 0xffff) {    // found something other than 0xffff, page is corrupt
+    while(p < e)
+    {
+        if(*p++ != 0xffff)
+        {    // found something other than 0xffff, page is corrupt
             return flash::not_blank;
         }
     }
@@ -240,8 +250,10 @@ uint16_t *get_free_offset(int which_page)
 
     // assert(*p == page_state::active);
 
-    while(p < page_end) {
-        if(var_id(p) == 0xff) {
+    while(p < page_end)
+    {
+        if(var_id(p) == 0xff)
+        {
             return p;
         }
         p = next(p);
@@ -258,12 +270,15 @@ uint16_t *find_var(int page, int id)
     uint16_t *p = page_data(page);
     uint16_t *page_end = page_end_addr(page);
     uint16_t *var = null;
-    while(p < page_end) {
+    while(p < page_end)
+    {
         int this_id = var_id(p);
-        if(this_id == 0xff) {
+        if(this_id == 0xff)
+        {
             break;
         }
-        if(this_id == id) {
+        if(this_id == id)
+        {
             var = p;    // last one found is the most current one
         }
         p = next(p);
@@ -285,12 +300,14 @@ int flash_write_var(uint16_t *&p, uint16_t id, uint16_t len, byte *data)
 
     // write data as uint16_ts
     uint16_t *s = reinterpret_cast<uint16_t *>(data);
-    while(len > 1) {
+    while(len > 1)
+    {
         check(flash_write_16(p++, *s++));
         len -= 2;
     }
     // and last byte for odd length ones
-    if(len == 1) {
+    if(len == 1)
+    {
         check(flash_write_16(p, reinterpret_cast<byte *>(s)[0]));    // so we don't read off the end of the array which would probably be fine but you know how people can get
     }
     p = next_space;
@@ -330,22 +347,30 @@ int migrate_page(uint16_t id, int old_page, uint16_t len, byte *data)
     uint16_t *dst_base = page_data(new_page);
     uint16_t *old_value = null;
 
-    while(var_id(scan_base) != 0xff) {
-        if(var_id(scan_base) == id) {    // omit old copies of the new var for now
-            old_value = scan_base;       // but remember it in case we need the old value (not enough room for the new one)
-        } else {
+    while(var_id(scan_base) != 0xff)
+    {
+        if(var_id(scan_base) == id)
+        {                             // omit old copies of the new var for now
+            old_value = scan_base;    // but remember it in case we need the old value (not enough room for the new one)
+        }
+        else
+        {
             uint16_t *f = find_var(new_page, var_id(scan_base));    // already written to the new page?
-            if(f == null) {
+            if(f == null)
+            {
                 uint16_t *n = scan_base;    // no, scan for latest version
                 uint16_t *scan_var = scan_base;
-                while(var_id(scan_var) != 0xff) {
-                    if(var_id(scan_var) == var_id(scan_base)) {
+                while(var_id(scan_var) != 0xff)
+                {
+                    if(var_id(scan_var) == var_id(scan_base))
+                    {
                         n = scan_var;
                     }
                     scan_var = next(scan_var);
                 }
                 check(flash_write_var(dst_base, var_id(n), var_len(n), (byte *)n + 1));    // and copy it
-                if(dst_base >= page_end_addr(new_page)) {
+                if(dst_base >= page_end_addr(new_page))
+                {
                     return flash::no_room;    // Hmph, not enough room in the flash, this should never happen, we haven't added the new one yet!?
                 }
             }
@@ -355,10 +380,12 @@ int migrate_page(uint16_t id, int old_page, uint16_t len, byte *data)
 
     // write the new value if there's room
     uint16 words_remaining = page_end_addr(new_page) - dst_base;
-    int total_words_required = roundup(len) / 2 + 1;
-    if(words_remaining < total_words_required) {
+    int    total_words_required = roundup(len) / 2 + 1;
+    if(words_remaining < total_words_required)
+    {
         log("Not enough room for new value (id: %d, len: %d)\n", id, len);
-        if(old_value != null) {
+        if(old_value != null)
+        {
             id = var_id(old_value);    // no room, write the old value instead
             len = var_len(old_value);
             data = reinterpret_cast<byte *>(old_value) + 2;    // +2 skips the 2 byte header
@@ -378,10 +405,11 @@ int migrate_page(uint16_t id, int old_page, uint16_t len, byte *data)
 
 int write_var(int page, uint16_t id, uint16_t len, byte *data)
 {
-    uint16_t required = roundup(len) / sizeof(uint16_t);    // space needed in uint16s
-    uint16_t *loc = get_free_offset(page);                  // find some free space at the end
-    uint16 *end = page_end_addr(page);
-    if(loc == null || (end - loc) < required) {      // if page is full or not enough space left
+    uint16_t  required = roundup(len) / sizeof(uint16_t);    // space needed in uint16s
+    uint16_t *loc = get_free_offset(page);                   // find some free space at the end
+    uint16 *  end = page_end_addr(page);
+    if(loc == null || (end - loc) < required)
+    {                                                // if page is full or not enough space left
         check(migrate_page(id, page, len, data));    // copy all old values and this new value to the other page
         return flash::ok;
     }
@@ -398,10 +426,12 @@ int verify_page(int page)
 {
     uint16_t *p = page_data(page);
     uint16_t *e = page_end_addr(page);
-    if(is_active(page)) {
+    if(is_active(page))
+    {
         p = get_free_offset(page);
     }
-    if(p == null || blank_check(p, e) != flash::ok) {
+    if(p == null || blank_check(p, e) != flash::ok)
+    {
         log("Flash page %d corrupt, erasing it\n", page);
         check(flash_erase_page(page));
     }
@@ -412,7 +442,8 @@ int verify_page(int page)
 
 //////////////////////////////////////////////////////////////////////
 
-namespace flash {
+namespace flash
+{
 
 //////////////////////////////////////////////////////////////////////
 // call this to check the flash is in a good state
@@ -446,16 +477,21 @@ int format()
 
 int load(byte id, byte len, byte *data)
 {
-    if(id == 0xff) {
+    if(id == 0xff)
+    {
         log("Can't use 0xff as a flash variable ID\n");
         return flash::bad_id;
     }
     uint16_t *v = null;
-    for(int i = 0; i < 2; ++i) {
-        if(is_active(i)) {
+    for(int i = 0; i < 2; ++i)
+    {
+        if(is_active(i))
+        {
             v = find_var(i, id);
-            if(v != null) {
-                if(var_len(v) != len) {
+            if(v != null)
+            {
+                if(var_len(v) != len)
+                {
                     log("Wrong length, not loaded\n");
                     return flash::bad_len;
                 }
@@ -476,16 +512,22 @@ int save(byte id, byte len, byte *data)
 {
     log("Saving var %02x (%d bytes) to flash\n", id, len);
 
-    if(id == 0xff) {
+    if(id == 0xff)
+    {
         return flash::bad_id;
     }
-    for(int p = 0; p < 2; ++p) {
-        if(is_active(p)) {
+    for(int p = 0; p < 2; ++p)
+    {
+        if(is_active(p))
+        {
             // see if it's already the same value and if it is, don't bother
             uint16_t *existing = find_var(p, id);
-            if(existing == null) {
+            if(existing == null)
+            {
                 log("var not found, saving...\n");
-            } else if(memcmp(existing + 1, data, len) == 0) {
+            }
+            else if(memcmp(existing + 1, data, len) == 0)
+            {
                 log("Value unchanged, not saving...\n");
                 return flash::ok;
             }
@@ -494,8 +536,10 @@ int save(byte id, byte len, byte *data)
             return flash::ok;
         }
     }
-    for(int p = 0; p < 2; ++p) {
-        if(is_empty(p)) {
+    for(int p = 0; p < 2; ++p)
+    {
+        if(is_empty(p))
+        {
             check(write_var(p, id, len, data));
             check(mark_page_active(p));
             return flash::ok;
@@ -527,7 +571,8 @@ int unlock()
 
 char const *error_message(int code)
 {
-    if(code < 0 || code >= countof(flash_error_strings)) {
+    if(code < 0 || code >= countof(flash_error_strings))
+    {
         return "not a flash error";
     }
     return flash_error_strings[code];
@@ -542,18 +587,22 @@ int dump(int page)
     uint16_t *e = page_end_addr(page);
     uint16_t *base = p;
     int const row = 32;
-    while(p < e) {
+    while(p < e)
+    {
         log("%08x ", p);
         byte *g = (byte *)p;
-        for(int i = 0; i < row; ++i) {
+        for(int i = 0; i < row; ++i)
+        {
             byte c = *g++;
-            if(c < ' ' || c > 126) {
+            if(c < ' ' || c > 126)
+            {
                 c = '.';
             }
             log("%c", c);
         }
         g = (byte *)p;
-        for(int i = 0; i < row; ++i) {
+        for(int i = 0; i < row; ++i)
+        {
             log(" %02x", *g++);
         }
         log("\n");
@@ -580,7 +629,8 @@ int dump(int page)
 
 void flash_wait()
 {
-    while((FLASH->SR & FLASH_SR_BSY) != 0) {
+    while((FLASH->SR & FLASH_SR_BSY) != 0)
+    {
     }
 }
 
@@ -591,10 +641,12 @@ int flash_result()
 {
     flash_wait();
 
-    if((FLASH->SR & FLASH_SR_WRPRTERR) != 0) {
+    if((FLASH->SR & FLASH_SR_WRPRTERR) != 0)
+    {
         return flash::locked;
     }
-    if((FLASH->SR & FLASH_SR_PGERR) != 0) {
+    if((FLASH->SR & FLASH_SR_PGERR) != 0)
+    {
         return flash::write_error;
     }
     return flash::ok;
@@ -634,7 +686,8 @@ int flash_erase_page(int which_page)
 int flash_lock()
 {
     log("Locking flash against writes\n");
-    if(HAL_FLASH_Lock() == HAL_OK) {
+    if(HAL_FLASH_Lock() == HAL_OK)
+    {
         return flash::ok;
     }
     return flash::cant_lock;
@@ -646,7 +699,8 @@ int flash_lock()
 int flash_unlock()
 {
     log("Unlocking flash for writes\n");
-    if(HAL_FLASH_Unlock() != HAL_OK) {
+    if(HAL_FLASH_Unlock() != HAL_OK)
+    {
         log("Error unlocking flash\n");
         return flash::cant_unlock;
     }
@@ -659,7 +713,8 @@ int flash_unlock()
 // FLASH TEST MODE - just use some ram
 //////////////////////////////////////////////////////////////////////
 
-namespace {
+namespace
+{
 bool test_locked = true;
 
 }    // namespace
@@ -684,7 +739,8 @@ int flash_result()
 
 int flash_write_16(uint16_t *dest, uint16_t src)
 {
-    if(test_locked) {
+    if(test_locked)
+    {
         return flash::locked;
     }
     *dest = src;

@@ -30,7 +30,7 @@ void lock();
 
 //////////////////////////////////////////////////////////////////////
 // format - reset the flash contents to empty
-// this will be called internally if corrupt flash is detected
+// this will be called internally if corrupt flash is detected
 // can also be called in response to user request
 
 int format();
