@@ -45,6 +45,14 @@ using uintptr = uint32_t;
 
 //////////////////////////////////////////////////////////////////////
 
+void *__builtin_memcpy(void *destination, void const *source, size_t num);
+int _builtin_memcmp(void const *ptr1, void const *ptr2, size_t num);
+
+#define memcpy __builtin_memcpy
+#define memcmp __builtin_memcmp
+
+//////////////////////////////////////////////////////////////////////
+
 inline int abs(int x)
 {
     return (x < 0) ? -x : x;
