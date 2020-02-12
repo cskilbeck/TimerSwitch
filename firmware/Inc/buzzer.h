@@ -1,0 +1,12 @@
+//////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+//////////////////////////////////////////////////////////////////////
+
+void set_buzzer_volume(int x);
+void set_buzzer_pitch(int x);
+void set_buzzer_note(int note);
+void set_buzzer_state(bool on_or_off);
+void set_buzzer_duration(int ms);
+void buzzer_update();
