@@ -187,10 +187,19 @@ void max7219_set_string(char const *p)
 
 void max7219_set_number(uint x)
 {
-    for(int i = 0; i < 4; ++i)
+    int i;
+    for(i = 0; i < 4; ++i)
     {
         set_entry(setup_digit0 + i, 0xff, max_Digit0 + i, seg_digits[x % 10]);
         x /= 10;
+        if(x == 0 && i >= 2)
+        {
+            break;
+        }
+    }
+    for(i += 1; i < 4; ++i)
+    {
+        set_entry(setup_digit0 + i, 0xff, max_Digit0 + i, 0);
     }
 }
 

@@ -18,6 +18,17 @@ button_t        button;
 int             knob_rotation = 0;
 
 //////////////////////////////////////////////////////////////////////
+// flash var ids
+
+enum
+{
+    flash_id_timer = 1,
+    flash_id_brightness = 2,
+    flash_id_beep = 3,
+    flash_id_flash = 4
+};
+
+//////////////////////////////////////////////////////////////////////
 
 void init_off();
 void init_countdown();
@@ -66,11 +77,26 @@ state_t all_states[] =
 
 state_t *current_state = null;
 uint32   state_time = 0;
+uint16   timer_start = 60 * 30;
 uint16   timer_left = 0;
 int      press_time = 0;
 int      beep_threshold = 3;
 int      flash_threshold = 58;
 int      display_brightness = 15;
+
+//////////////////////////////////////////////////////////////////////
+
+template<typename T> int flash_load(int id, T const &data)
+{
+    return flash::load(id, sizeof(T), (byte *)&data);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+template<typename T> int flash_save(int id, T const &data)
+{
+    return flash::save(id, sizeof(T), (byte *)&data);
+}
 
 //////////////////////////////////////////////////////////////////////
 
@@ -106,7 +132,7 @@ void state_off()
 {
     if(button.pressed)
     {
-        timer_left = 60;    // load from flash
+        timer_left = timer_start;    // load from flash
         set_state(state::countdown);
     }
 }
@@ -152,8 +178,11 @@ void state_countdown()
         second_elapsed = millis + 1000;
         if(timer_left == 0)
         {
-            set_buzzer_note(22);
-            set_buzzer_duration(250);
+            if(beep_threshold != 0)
+            {
+                set_buzzer_note(22);
+                set_buzzer_duration(250);
+            }
             set_state(state::off);
         }
         else if(beep_threshold != 0 && timer_left <= beep_threshold)
@@ -185,7 +214,6 @@ void state_countdown()
     {
         set_state(state::menu);
     }
-
     else if(button.released && press_time != 0)
     {
         set_state(state::off);
@@ -207,9 +235,12 @@ uint32 idle_timer = 0;
 
 //////////////////////////////////////////////////////////////////////
 
-void setup_menu()
+void idle_check()
 {
-    max7219_set_string(menu_items[menu_index]);
+    if(millis > idle_timer)
+    {
+        set_state(state::countdown);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -217,27 +248,19 @@ void setup_menu()
 void init_menu()
 {
     menu_index = 0;
-    setup_menu();
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void state_menu()
 {
-    if(millis > idle_timer)
-    {
-        set_state(state::countdown);
-        return;
-    }
-    if(knob_rotation != 0)
-    {
-        menu_index = max(0, min(countof(menu_items) - 1, menu_index + knob_rotation));
-        setup_menu();
-    }
+    menu_index = max(0, min(countof(menu_items) - 1, menu_index + knob_rotation));
+    max7219_set_string(menu_items[menu_index]);
     if(button.pressed)
     {
         set_state(menu_states[menu_index]);
     }
+    idle_check();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -250,28 +273,43 @@ void state_set_timer()
 
 void state_set_brightness()
 {
-    if(knob_rotation != 0)
-    {
-        display_brightness = max(0, min(15, display_brightness + knob_rotation));
-        max7219_set_intensity(display_brightness);
-    }
+    display_brightness = max(0, min(15, display_brightness + knob_rotation));
+    max7219_set_intensity(display_brightness);
     max7219_set_number(display_brightness);
     if(button.pressed)
     {
+        flash_save(flash_id_brightness, display_brightness);
         set_state(state::menu);
     }
+    idle_check();
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void state_set_beep()
 {
+    beep_threshold = max(0, min(60, beep_threshold + knob_rotation));
+    max7219_set_number(beep_threshold);
+    if(button.pressed)
+    {
+        flash_save(flash_id_beep, beep_threshold);
+        set_state(state::menu);
+    }
+    idle_check();
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void state_set_flash()
 {
+    flash_threshold = max(0, min(60, flash_threshold + knob_rotation));
+    max7219_set_number(flash_threshold);
+    if(button.pressed)
+    {
+        flash_save(flash_id_flash, flash_threshold);
+        set_state(state::menu);
+    }
+    idle_check();
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -328,15 +366,10 @@ extern "C" void user_main()
     // go into 'off' mode
     set_state(state::off);
 
-    // flash var ids
-    enum
-    {
-        flashid_timer = 1
-    };
-
-    if(flash::load(flashid_timer, sizeof(uint16), (byte *)&timer_left) == flash::ok)
-    {
-    }
+    flash_load(flash_id_timer, timer_start);
+    flash_load(flash_id_beep, beep_threshold);
+    flash_load(flash_id_brightness, display_brightness);
+    flash_load(flash_id_flash, flash_threshold);
 
     while(true)
     {
