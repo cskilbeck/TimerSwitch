@@ -1,4 +1,4 @@
-|RECORD=BOM|FILENAME=C:\Dev\TimerSwitch\pcb\TimerSwitch\TimerSwitch.$$$|KIND=ALTIUM_DESIGNER_LIVEBOM|VERSION=1.00|DATE=10/02/2020|TIME=23:48:57|CURRENCY=USD
+|RECORD=BOM|FILENAME=C:\Dev\TimerSwitch\pcb\TimerSwitch\TimerSwitch.$$$|KIND=ALTIUM_DESIGNER_LIVEBOM|VERSION=1.00|DATE=12/02/2020|TIME=19:48:41|CURRENCY=USD
 |RECORD=GeneralOptions|BATCHMODE=5|SUPPLIERPRODQTY=10|SUPPLIERAUTOQTY=TRUE|SUPPLIERUSECACHEDPRICING=TRUE|SUPPLIERCURRENCY=
 |RECORD=SortOrderOptions|SORTORDER=Description=Up!Designator=Up
 |RECORD=GroupOrderOptions
@@ -12,7 +12,7 @@
 |RECORD=PartChoiceGroups|GROUPSORTORDER=Ascending|GROUPBYFIELDCOUNT=0
 |RECORD=CatalogItem|ITEMTYPE=Automatic-NonVault|UNIQUEID=TimerSwitch.SchLib\CAP_CERAMIC|USERCOMMENTS=1uF|NOTE=|SELECTEDPARAMETERSHASH=1uF,1uF,|COMPONENTPARAMETERS=Comment=1uF,"Component Kind=Standard",Description=,Footprint=CAPC1608X07L,"Ibis Model=","Library Name=TimerSwitch.SchLib","Library Reference=CAP_CERAMIC",PCB3D=,"Signal Integrity=",Simulation=,Value=1uF|DESIGNITEMID=CAP_CERAMIC
 |RECORD=PartChoiceGroups|GROUPSORTORDER=Ascending|GROUPBYFIELDCOUNT=0
-|RECORD=CatalogItem|ITEMTYPE=Automatic-NonVault|UNIQUEID=TimerSwitch.SchLib\CAP_CERAMIC|DESCRIPTION=Ceramic capacitor|USERCOMMENTS=*|NOTE=|SELECTEDPARAMETERSHASH=,,"Ceramic capacitor"|COMPONENTPARAMETERS=Comment=,"Component Kind=Standard","Description=Ceramic capacitor",Footprint=CAPC3216X07L,"Ibis Model=","Library Name=TimerSwitch.SchLib","Library Reference=CAP_CERAMIC",PCB3D=,"Signal Integrity=",Simulation=,Value=|DESIGNITEMID=CAP_CERAMIC
+|RECORD=CatalogItem|ITEMTYPE=Automatic-NonVault|UNIQUEID=TimerSwitch.SchLib\CAP_CERAMIC|DESCRIPTION=Ceramic capacitor|USERCOMMENTS=4.7uF|NOTE=|SELECTEDPARAMETERSHASH=4.7uF,4.7uF,"Ceramic capacitor"|COMPONENTPARAMETERS=Comment=4.7uF,"Component Kind=Standard","Description=Ceramic capacitor",Footprint=CAPC3216X07L,"Ibis Model=","Library Name=TimerSwitch.SchLib","Library Reference=CAP_CERAMIC",PCB3D=,"Signal Integrity=",Simulation=,Value=4.7uF|DESIGNITEMID=CAP_CERAMIC
 |RECORD=PartChoiceGroups|GROUPSORTORDER=Ascending|GROUPBYFIELDCOUNT=0
 |RECORD=CatalogItem|ITEMTYPE=Automatic-NonVault|UNIQUEID=TimerSwitch.SchLib\LED|DESCRIPTION=5mm through hole LED|USERCOMMENTS=LED|NOTE=|SELECTEDPARAMETERSHASH=LED,Value,"5mm through hole LED"|COMPONENTPARAMETERS=Comment=LED,"Component Kind=Standard","Description=5mm through hole LED",Footprint=LED,"Ibis Model=","Library Name=TimerSwitch.SchLib","Library Reference=LED",PCB3D=,"Signal Integrity=",Simulation=|DESIGNITEMID=LED
 |RECORD=PartChoiceGroups|GROUPSORTORDER=Ascending|GROUPBYFIELDCOUNT=0

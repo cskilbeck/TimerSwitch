@@ -198,7 +198,7 @@ void state_countdown()
 char const *menu_items[] =
 {
     "SET ",
-    "BRIT",
+    "BRT ",
     "BEEP",
     "FLSH",
     "DONE"
