@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////
 // button debouncer
 
-template <int history_len> struct button_t
+struct button_t
 {
     inline bool is_run(uint32 x)
     {
@@ -53,7 +53,9 @@ template <int history_len> struct button_t
     bool released;
 
 private:
-    static_assert(history_len <= 32 && history_len >= 2, "Must use 2..32 for history len");
+    static constexpr int history_len = 20;
+
+    static_assert(history_len <= 31 && history_len >= 2, "Must use 2..31 for history len");
 
     // track last 32 states
     uint32 history{ 0 };
