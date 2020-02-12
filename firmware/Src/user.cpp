@@ -70,6 +70,7 @@ uint16   timer_left = 0;
 int      press_time = 0;
 int      beep_threshold = 3;
 int      flash_threshold = 58;
+int      display_brightness = 15;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -116,7 +117,7 @@ void init_countdown()
 {
     MOSFET_GPIO_Port->BSRR = MOSFET_Pin;
     max7219_set_wakeup(1);
-    max7219_set_intensity(15);    // load from flash
+    max7219_set_intensity(display_brightness);    // load from flash
     second_elapsed = millis + 1000;
     press_time = 0;
 }
@@ -249,6 +250,16 @@ void state_set_timer()
 
 void state_set_brightness()
 {
+    if(knob_rotation != 0)
+    {
+        display_brightness = max(0, min(15, display_brightness + knob_rotation));
+        max7219_set_intensity(display_brightness);
+    }
+    max7219_set_number(display_brightness);
+    if(button.pressed)
+    {
+        set_state(state::menu);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
