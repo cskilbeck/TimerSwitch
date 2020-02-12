@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Globalization;
@@ -84,13 +79,24 @@ namespace segment_editor
             update_segments();
         }
 
+        private byte rbit(byte a)
+        {
+            byte b = 0;
+            for (int i = 0; i < 7; ++i)
+            {
+                b = (byte)((b << 1) | (a & 1));
+                a >>= 1;
+            }
+            return b;
+        }
+
         private void output_bitmaps(StreamWriter f, string header, string sep1, string sep2, string sep3, string tail, int entries_per_line)
         {
             f.Write(header);
             string sep = sep1;
             for(int i = 0; i<128; ++i)
             {
-                f.Write($"{sep}{bitmaps[i]:x2}");
+                f.Write($"{sep}{rbit(bitmaps[i]):x2}");
                 if(((i + 1) % entries_per_line) == 0)
                 {
                     sep = sep2;
@@ -153,7 +159,7 @@ namespace segment_editor
                                 {
                                     if(int.TryParse(data.Substring(i * 2, 2), System.Globalization.NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int x))
                                     {
-                                        bitmaps[i] = (byte)x;
+                                        bitmaps[i] = rbit((byte)x);
                                     }
                                     else
                                     {
@@ -183,11 +189,7 @@ namespace segment_editor
 
         public override string ToString()
         {
-            string s = "";
-            if(v >= 32)
-            {
-                s = ((char)v).ToString();
-            }
+            string s = (v < 32) ? "" : ((char)v).ToString();
             return $"{v}\t{s}";
         }
     }

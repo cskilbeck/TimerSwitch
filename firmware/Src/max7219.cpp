@@ -70,6 +70,7 @@ enum
     setup_intensity = 2,
     setup_wakeup = 3,
     setup_digit0 = 4,
+    setup_digit3 = 7,
 
     setup_count = 8
 };
@@ -90,6 +91,15 @@ uint16_t setup_packet[8] = {
 static bool dirty = false;    // track if setup_packet changed
 
 SPI_HandleTypeDef *max_spi_handle = null;
+
+extern unsigned char segments[128];
+
+//////////////////////////////////////////////////////////////////////
+
+static byte ascii_to_segments(int c)
+{
+    return segments[c & 127];
+}
 
 //////////////////////////////////////////////////////////////////////
 // poke new command word in setup_packet[]
@@ -159,6 +169,16 @@ __volatile__ void max7219_set_dp(int x)
         }
         p += 1;
         x >>= 1;
+    }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void max7219_set_string(char const *p)
+{
+    for(int i=0; i<4; ++i)
+    {
+        set_entry(setup_digit3 - i, 0xff, max_Digit3 - i, ascii_to_segments(p[i]));
     }
 }
 

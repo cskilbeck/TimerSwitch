@@ -23,6 +23,7 @@ int knob_rotation = 0;
 
 void init_off();
 void init_countdown();
+void init_menu();
 
 void state_off();
 void state_countdown();
@@ -56,7 +57,7 @@ state_t all_states[] =
 {
     { init_off, state_off },
     { init_countdown, state_countdown },
-    { null, state_menu },
+    { init_menu, state_menu },
     { null, state_set_timer },
     { null, state_set_brightness },
     { null, state_set_beep },
@@ -169,20 +170,7 @@ void state_countdown()
         gpio_toggle(DEBUG2_GPIO_Port, DEBUG2_Pin);
         press_time = millis + 1000;
     }
-
-    if(button.released && press_time != 0)
-    {
-        gpio_toggle(DEBUG1_GPIO_Port, DEBUG1_Pin);
-        if(millis < press_time)
-        {
-            set_state(state::off);
-        }
-        else
-        {
-            set_state(state::menu);
-        }
-    }
-
+    
     // rotary encoder changes timer (for this run only)
     if(knob_rotation != 0)
     {
@@ -193,12 +181,78 @@ void state_countdown()
     // update the 7 segment display
     max7219_set_number(get_display_time(timer_left));
     max7219_set_dp(1 << 2);
+
+    if(button.down && press_time != 0 && millis > press_time)
+    {
+        set_state(state::menu);
+    }
+
+    else if(button.released && press_time != 0)
+    {
+        set_state(state::off);
+    }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+char const *menu_items[] =
+{
+    "SET ",
+    "BRIT",
+    "BEEP",
+    "FLSH",
+    "DONE"
+};
+
+//////////////////////////////////////////////////////////////////////
+
+state const menu_states[] =
+{
+    state::set_timer,
+    state::set_brightness,
+    state::set_beep,
+    state::set_flash,
+    state::countdown
+};
+
+//////////////////////////////////////////////////////////////////////
+
+int menu_index = 0;
+uint32 idle_timer = 0;
+
+//////////////////////////////////////////////////////////////////////
+
+void setup_menu()
+{
+    max7219_set_string(menu_items[menu_index]);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void init_menu()
+{
+    menu_index = 0;
+    setup_menu();
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void state_menu()
 {
+    if(millis > idle_timer)
+    {
+        set_state(state::countdown);
+        return;
+    }
+    if(knob_rotation != 0)
+    {
+        menu_index = max(0, min(countof(menu_items)-1, menu_index + knob_rotation));
+        setup_menu();
+    }
+    if(button.pressed)
+    {
+        set_state(menu_states[menu_index]);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -298,6 +352,11 @@ extern "C" void user_main()
         button.update();
         buzzer_update();
         knob_rotation = atomic_exchange(&rotary_encoder, 0);
+
+        // afk timer
+        if(knob_rotation != 0 || button.pressed || button.released) {
+            idle_timer = millis + 10000;
+        }
         
         current_state->update();
 

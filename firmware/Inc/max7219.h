@@ -33,3 +33,6 @@ void max7219_set_hex(uint x);
 
 // apply changes to display
 void max7219_update();
+
+// ascii, kinda, must be 4 chars long, pad it with zeroes or spaces
+void max7219_set_string(char const *p);
