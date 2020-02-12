@@ -56,6 +56,13 @@ inline void gpio_set(GPIO_TypeDef *gpio, uint32 pins)
 
 //////////////////////////////////////////////////////////////////////
 
+inline void gpio_set_to(GPIO_TypeDef *gpio, uint32 pins, bool on_or_off)
+{
+    gpio->BSRR = pins << (on_or_off ? 0 : 16);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 inline void gpio_set_clear(GPIO_TypeDef *gpio, uint32 on_pins, uint32 off_pins)
 {
     gpio->BSRR = on_pins | (off_pins << 16);

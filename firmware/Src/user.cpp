@@ -1,3 +1,4 @@
+
 //////////////////////////////////////////////////////////////////////
 
 #include "main.h"
@@ -11,27 +12,17 @@
 
 volatile uint32 ticks = 0;
 volatile uint32 millis = 0;
-volatile int    rotation = 0;
+volatile int    rotary_encoder = 0;
 
-uint32 second_elapsed = 0;
+volatile uint32 second_elapsed = 0;
 
 button_t button;
-
-typedef void (*state_fn)();
-state_fn current_state = null;
-
-// how long been in current state
-uint32 state_time = 0;
-
-uint16 timer_left = 0;
-int    press_time = 0;
-int    beep_threshold = 3;
-int    flash_threshold = 58;
+int knob_rotation = 0;
 
 //////////////////////////////////////////////////////////////////////
 
-void turn_on();
-void turn_off();
+void init_off();
+void init_countdown();
 
 void state_off();
 void state_countdown();
@@ -41,29 +32,54 @@ void state_set_brightness();
 void state_set_beep();
 void state_set_flash();
 
+struct state_t
+{
+    typedef void (*state_fn)();
+    
+    state_fn init;
+    state_fn update;
+};
+
+enum class state
+{
+    invalid = -1,
+    off = 0,
+    countdown = 1,
+    menu = 2,
+    set_timer = 3,
+    set_brightness = 4,
+    set_beep = 5,
+    set_flash = 6
+};
+    
+state_t all_states[] = 
+{
+    { init_off, state_off },
+    { init_countdown, state_countdown },
+    { null, state_menu },
+    { null, state_set_timer },
+    { null, state_set_brightness },
+    { null, state_set_beep },
+    { null, state_set_flash }
+};
+
+// how long been in current state
+state_t *current_state = null;
+uint32 state_time = 0;
+uint16 timer_left = 0;
+int    press_time = 0;
+int    beep_threshold = 3;
+int    flash_threshold = 58;
+
 //////////////////////////////////////////////////////////////////////
 
-int get_display_time(uint16 timer_left)
+void set_state(state s)
 {
-    int mins = timer_left / 60;
-    int hours = mins / 60;
-    int minutes = mins % 60;
-    int seconds = timer_left % 60;
-    int high = hours;
-    int low = minutes;
-    if(hours < 1)
+    current_state = all_states + static_cast<int>(s);
+    if(current_state->init != null)
     {
-        high = minutes;
-        low = seconds;
+        current_state->init();
     }
-    return (high * 100) + low;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void set_state(state_fn new_state)
-{
-    current_state = new_state;
     state_time = millis;
 }
 
@@ -76,7 +92,7 @@ int state_time_elapsed()
 
 //////////////////////////////////////////////////////////////////////
 
-void turn_off()
+void init_off()
 {
     MOSFET_GPIO_Port->BRR = MOSFET_Pin;
     max7219_set_wakeup(0);
@@ -89,14 +105,40 @@ void state_off()
 {
     if(button.pressed)
     {
-        MOSFET_GPIO_Port->BSRR = MOSFET_Pin;
-        max7219_set_wakeup(1);
-        max7219_set_intensity(15);  // load from flash
-        second_elapsed = millis + 1000;
-        timer_left = 120;   // load from flash
-        press_time = 0;
-        set_state(state_countdown);
+        timer_left = 60;   // load from flash
+        set_state(state::countdown);
     }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void init_countdown()
+{
+    MOSFET_GPIO_Port->BSRR = MOSFET_Pin;
+    max7219_set_wakeup(1);
+    max7219_set_intensity(15);  // load from flash
+    second_elapsed = millis + 1000;
+    press_time = 0;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+int get_display_time(uint16 seconds)
+{
+    int minutes = seconds / 60;
+    int hours = minutes / 60;
+
+    int secs = seconds % 60;
+    int mins = minutes % 60;
+
+    int high = hours;
+    int low = mins;
+    if(hours < 1)
+    {
+        high = mins;
+        low = secs;
+    }
+    return (high * 100) + low;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -111,8 +153,7 @@ void state_countdown()
         {
             set_buzzer_note(22);
             set_buzzer_duration(250);
-            turn_off();
-            set_state(state_off);
+            set_state(state::off);
         }
         else if(beep_threshold != 0 && timer_left <= beep_threshold)
         {
@@ -125,26 +166,27 @@ void state_countdown()
     // long/short press = menu/turn off
     if(button.pressed)
     {
+        gpio_toggle(DEBUG2_GPIO_Port, DEBUG2_Pin);
         press_time = millis + 1000;
     }
-    else if(button.released)
+
+    if(button.released && press_time != 0)
     {
+        gpio_toggle(DEBUG1_GPIO_Port, DEBUG1_Pin);
         if(millis < press_time)
         {
-            turn_off();
-            set_state(state_off);
+            set_state(state::off);
         }
         else
         {
-            set_state(state_menu);
+            set_state(state::menu);
         }
     }
 
     // rotary encoder changes timer (for this run only)
-    int r = atomic_exchange(&rotation, 0);
-    if(r != 0)
+    if(knob_rotation != 0)
     {
-        timer_left = max(10, min(60 * 60 * 25, timer_left + r * 60)) / 10 * 10;
+        timer_left = max(10, min(60 * 60 * 25, timer_left + knob_rotation * 60)) / 10 * 10;
         second_elapsed = millis + 1000;
     }
 
@@ -210,7 +252,7 @@ extern "C" void HAL_GPIO_EXTI_Callback(uint16 GPIO_Pin)
 {
     int a = gpio_get(ROTARYA_GPIO_Port, ROTARYA_Pin) ? 2 : 0;
     int b = gpio_get(ROTARYB_GPIO_Port, ROTARYB_Pin) ? 1 : 0;
-    rotation += rotary_update(a | b);
+    rotary_encoder += rotary_update(a | b);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -235,7 +277,7 @@ extern "C" void user_main()
     max7219_init(&hspi1);
 
     // go into 'off' mode
-    turn_off();
+    set_state(state::off);
 
     // flash var ids
     enum
@@ -255,8 +297,9 @@ extern "C" void user_main()
         // this will be called, at minimum, every tick (100uS)
         button.update();
         buzzer_update();
+        knob_rotation = atomic_exchange(&rotary_encoder, 0);
         
-        (*current_state)();
+        current_state->update();
 
         max7219_update();
     }
