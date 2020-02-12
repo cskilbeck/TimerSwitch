@@ -13,11 +13,9 @@
 volatile uint32 ticks = 0;
 volatile uint32 millis = 0;
 volatile int    rotary_encoder = 0;
-
 volatile uint32 second_elapsed = 0;
-
-button_t button;
-int knob_rotation = 0;
+button_t        button;
+int             knob_rotation = 0;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -36,7 +34,7 @@ void state_set_flash();
 struct state_t
 {
     typedef void (*state_fn)();
-    
+
     state_fn init;
     state_fn update;
 };
@@ -52,25 +50,26 @@ enum class state
     set_beep = 5,
     set_flash = 6
 };
-    
-state_t all_states[] = 
-{
-    { init_off, state_off },
-    { init_countdown, state_countdown },
-    { init_menu, state_menu },
-    { null, state_set_timer },
-    { null, state_set_brightness },
-    { null, state_set_beep },
-    { null, state_set_flash }
-};
 
-// how long been in current state
+// clang-format off
+state_t all_states[] =
+{
+    { init_off,                 state_off },
+    { init_countdown,           state_countdown },
+    { init_menu,                state_menu },
+    { null,                     state_set_timer },
+    { null,                     state_set_brightness },      
+    { null,                     state_set_beep },
+    { null,                     state_set_flash } 
+};
+// clang-format on
+
 state_t *current_state = null;
-uint32 state_time = 0;
-uint16 timer_left = 0;
-int    press_time = 0;
-int    beep_threshold = 3;
-int    flash_threshold = 58;
+uint32   state_time = 0;
+uint16   timer_left = 0;
+int      press_time = 0;
+int      beep_threshold = 3;
+int      flash_threshold = 58;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -106,7 +105,7 @@ void state_off()
 {
     if(button.pressed)
     {
-        timer_left = 60;   // load from flash
+        timer_left = 60;    // load from flash
         set_state(state::countdown);
     }
 }
@@ -117,7 +116,7 @@ void init_countdown()
 {
     MOSFET_GPIO_Port->BSRR = MOSFET_Pin;
     max7219_set_wakeup(1);
-    max7219_set_intensity(15);  // load from flash
+    max7219_set_intensity(15);    // load from flash
     second_elapsed = millis + 1000;
     press_time = 0;
 }
@@ -167,14 +166,13 @@ void state_countdown()
     // long/short press = menu/turn off
     if(button.pressed)
     {
-        gpio_toggle(DEBUG2_GPIO_Port, DEBUG2_Pin);
         press_time = millis + 1000;
     }
-    
+
     // rotary encoder changes timer (for this run only)
     if(knob_rotation != 0)
     {
-        timer_left = max(10, min(60 * 60 * 25, timer_left + knob_rotation * 60)) / 10 * 10;
+        timer_left = max(10, min(60 * 60 * 24, timer_left + knob_rotation * 60)) / 10 * 10;
         second_elapsed = millis + 1000;
     }
 
@@ -195,29 +193,15 @@ void state_countdown()
 
 //////////////////////////////////////////////////////////////////////
 
-char const *menu_items[] =
-{
-    "SET ",
-    "BRT ",
-    "BEEP",
-    "FLSH",
-    "DONE"
-};
+char const *menu_items[] = { "SET ", "BRT ", "BEEP", "FLSH", "DONE" };
 
 //////////////////////////////////////////////////////////////////////
 
-state const menu_states[] =
-{
-    state::set_timer,
-    state::set_brightness,
-    state::set_beep,
-    state::set_flash,
-    state::countdown
-};
+state const menu_states[] = { state::set_timer, state::set_brightness, state::set_beep, state::set_flash, state::countdown };
 
 //////////////////////////////////////////////////////////////////////
 
-int menu_index = 0;
+int    menu_index = 0;
 uint32 idle_timer = 0;
 
 //////////////////////////////////////////////////////////////////////
@@ -246,7 +230,7 @@ void state_menu()
     }
     if(knob_rotation != 0)
     {
-        menu_index = max(0, min(countof(menu_items)-1, menu_index + knob_rotation));
+        menu_index = max(0, min(countof(menu_items) - 1, menu_index + knob_rotation));
         setup_menu();
     }
     if(button.pressed)
@@ -354,10 +338,11 @@ extern "C" void user_main()
         knob_rotation = atomic_exchange(&rotary_encoder, 0);
 
         // afk timer
-        if(knob_rotation != 0 || button.pressed || button.released) {
+        if(knob_rotation != 0 || button.pressed || button.released)
+        {
             idle_timer = millis + 10000;
         }
-        
+
         current_state->update();
 
         max7219_update();
