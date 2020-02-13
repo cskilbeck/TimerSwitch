@@ -89,8 +89,8 @@ int             knob_rotation = 0;
 state_t *current_state = null;
 state_t *next_state = null;
 uint32   state_time = 0;
-uint16   timer_start = 60 * 30;
-uint16   timer_left = 0;
+uint32   timer_start = 60 * 30;
+uint32   timer_left = 0;
 int      press_time = 0;
 int      beep_threshold = 3;
 int      flash_threshold = 58;
@@ -194,7 +194,7 @@ void init_countdown()
 
 //////////////////////////////////////////////////////////////////////
 
-int get_display_time(uint16 seconds)
+int get_display_time(uint32 seconds)
 {
     int minutes = seconds / 60;
     int hours = minutes / 60;
@@ -260,6 +260,11 @@ void state_countdown()
             set_state(state::off);
         }
     }
+    
+    if(timer_left < flash_threshold)
+    {
+        max7219_set_wakeup(((millis % 1000) > 250) ? 1 : 0);
+    }
 
     // update the 7 segment display
     max7219_set_number(get_display_time(timer_left));
@@ -271,31 +276,42 @@ void state_countdown()
 void init_menu()
 {
     menu_index = 0;
+    max7219_set_wakeup(1);
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void state_menu()
 {
+    idle_check();
     menu_index = clamp(0, countof(menu_items) - 1, menu_index + knob_rotation);
     max7219_set_string(menu_items[menu_index]);
     if(button.pressed)
     {
         set_state(menu_states[menu_index]);
     }
-    idle_check();
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void state_set_timer()
 {
+    idle_check();
+    timer_start = clamp(10, 60 * 60 * 24, timer_start + knob_rotation * 60) / 10 * 10;
+    max7219_set_number(get_display_time(timer_start));
+    max7219_set_dp(1 << 2);
+    if(button.pressed)
+    {
+        flash::save(flash_id_timer, timer_start);
+        set_state(state::menu);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void state_set_brightness()
 {
+    idle_check();
     display_brightness = clamp(0, 15, display_brightness + knob_rotation);
     max7219_set_intensity(display_brightness);
     max7219_set_number(display_brightness + 1);
@@ -304,13 +320,13 @@ void state_set_brightness()
         flash::save(flash_id_brightness, display_brightness);
         set_state(state::menu);
     }
-    idle_check();
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void state_set_beep()
 {
+    idle_check();
     beep_threshold = clamp(0, 60, beep_threshold + knob_rotation);
     max7219_set_number(beep_threshold);
     if(button.pressed)
@@ -318,13 +334,13 @@ void state_set_beep()
         flash::save(flash_id_beep, beep_threshold);
         set_state(state::menu);
     }
-    idle_check();
 }
 
 //////////////////////////////////////////////////////////////////////
 
 void state_set_flash()
 {
+    idle_check();
     flash_threshold = clamp(0, 60, flash_threshold + knob_rotation);
     max7219_set_number(flash_threshold);
     if(button.pressed)
@@ -332,7 +348,6 @@ void state_set_flash()
         flash::save(flash_id_flash, flash_threshold);
         set_state(state::menu);
     }
-    idle_check();
 }
 
 //////////////////////////////////////////////////////////////////////
