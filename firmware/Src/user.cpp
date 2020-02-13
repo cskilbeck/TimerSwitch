@@ -217,12 +217,12 @@ int get_display_time(uint32 seconds)
 
 uint32 knob_adjust(int t)
 {
-    int delta = 10;
+    int delta = 60;
     if(t >= 60 * 60)
     {
         delta = 60 * 10;
     }
-    return clamp(10, 60 * 60 * 24, t + knob_rotation * delta) / delta * delta;
+    return clamp(60, 60 * 60 * 24, t + knob_rotation * delta) / delta * delta;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -261,7 +261,6 @@ void state_countdown()
     {
         press_time = millis + 1000;
     }
-
     if(press_time != 0)
     {
         if(button.down && millis > press_time)
@@ -273,7 +272,8 @@ void state_countdown()
             set_state(state::off);
         }
     }
-    
+
+    // flash display when turning off soon
     if(timer_left <= flash_threshold)
     {
         int frac = second_elapsed - millis;
