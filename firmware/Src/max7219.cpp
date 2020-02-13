@@ -185,14 +185,14 @@ void max7219_set_string(char const *p)
 //////////////////////////////////////////////////////////////////////
 // public function: set decimal number (0..9999)
 
-void max7219_set_number(uint x)
+void max7219_set_number(uint x, int leading)
 {
     int i;
     for(i = 0; i < 4; ++i)
     {
         set_entry(setup_digit0 + i, 0xff, max_Digit0 + i, seg_digits[x % 10]);
         x /= 10;
-        if(x == 0 && i >= 2)
+        if(x == 0 && i >= leading)
         {
             break;
         }

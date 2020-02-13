@@ -217,12 +217,12 @@ int get_display_time(uint32 seconds)
 
 uint32 knob_adjust(int t)
 {
-    int delta = 60;
+    int delta = 10;
     if(t >= 60 * 60)
     {
         delta = 60 * 10;
     }
-    return clamp(60, 60 * 60 * 24, t + knob_rotation * delta) / delta * delta;
+    return clamp(10, 60 * 60 * 24, t + knob_rotation * delta) / delta * delta;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -277,7 +277,7 @@ void state_countdown()
     if(timer_left <= flash_threshold)
     {
         int frac = second_elapsed - millis;
-        max7219_set_wakeup((frac > 250) ? 1 : 0);
+        max7219_set_wakeup((frac > 500) ? 0 : 1);
     }
 
     // update the 7 segment display
@@ -330,7 +330,7 @@ void state_set_brightness()
     idle_check();
     display_brightness = clamp(0, 15, display_brightness + knob_rotation);
     max7219_set_intensity(display_brightness);
-    max7219_set_number(display_brightness + 1);
+    max7219_set_number(display_brightness + 1, 0);
     if(button.pressed)
     {
         flash::unlock();
@@ -346,7 +346,7 @@ void state_set_beep()
 {
     idle_check();
     beep_threshold = clamp(0, 60, beep_threshold + knob_rotation);
-    max7219_set_number(beep_threshold);
+    max7219_set_number(beep_threshold, 0);
     if(button.pressed)
     {
         flash::unlock();
@@ -362,7 +362,7 @@ void state_set_flash()
 {
     idle_check();
     flash_threshold = clamp(0, 60, flash_threshold + knob_rotation);
-    max7219_set_number(flash_threshold);
+    max7219_set_number(flash_threshold, 0);
     if(button.pressed)
     {
         flash::unlock();

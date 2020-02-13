@@ -26,7 +26,7 @@ void max7219_set_intensity(int x);
 void max7219_set_dp(int x);
 
 // set decimal number (0..9999)
-void max7219_set_number(uint x);
+void max7219_set_number(uint x, int leading = 4);
 
 // set hex number (0..FFFF)
 void max7219_set_hex(uint x);
