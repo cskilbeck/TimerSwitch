@@ -51,6 +51,24 @@ int load(byte id, byte len, byte *data);
 int save(byte id, byte len, byte *data);
 
 //////////////////////////////////////////////////////////////////////
+
+#ifdef __cplusplus
+
+template<typename T> int load(int id, T const &data)
+{
+    return flash::load(id, sizeof(T), (byte *)&data);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+template<typename T> int save(int id, T const &data)
+{
+    return flash::save(id, sizeof(T), (byte *)&data);
+}
+
+#endif
+
+//////////////////////////////////////////////////////////////////////
 // error_message - get a string describing an error code
 
 char const *error_message(int code);
@@ -58,3 +76,4 @@ char const *error_message(int code);
 int dump(int page);
 
 }    // namespace flash
+

@@ -120,6 +120,13 @@ inline int max(int x, int y)
 
 //////////////////////////////////////////////////////////////////////
 
+inline int clamp(int low, int high, int value)
+{
+    return(max(low, min(high, value)));
+}
+
+//////////////////////////////////////////////////////////////////////
+
 inline int sgn(int x)
 {
     return (x >> 31) | (x != 0);

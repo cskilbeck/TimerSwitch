@@ -1,4 +1,8 @@
-
+//////////////////////////////////////////////////////////////////////
+// TODO (chs): menu: set timer
+// TODO (chs): do flasher time
+// TODO (chs): fix flash nvr load/save
+// TODO (chs): why buzzer so quiet?
 //////////////////////////////////////////////////////////////////////
 
 #include "main.h"
@@ -7,15 +11,6 @@
 #include "rotary.h"
 #include "flash.h"
 #include "buzzer.h"
-
-//////////////////////////////////////////////////////////////////////
-
-volatile uint32 ticks = 0;
-volatile uint32 millis = 0;
-volatile int    rotary_encoder = 0;
-volatile uint32 second_elapsed = 0;
-button_t        button;
-int             knob_rotation = 0;
 
 //////////////////////////////////////////////////////////////////////
 // flash var ids
@@ -30,6 +25,31 @@ enum
 
 //////////////////////////////////////////////////////////////////////
 
+struct state_t
+{
+    typedef void (*state_fn)();
+
+    state_fn init;      // called when set_state()
+    state_fn update;    // called in main loop
+};
+
+//////////////////////////////////////////////////////////////////////
+// state machine
+
+enum class state
+{
+    off = 0,
+    countdown = 1,
+    menu = 2,
+    set_timer = 3,
+    set_brightness = 4,
+    set_beep = 5,
+    set_flash = 6
+};
+
+//////////////////////////////////////////////////////////////////////
+// state machine functions
+
 void init_off();
 void init_countdown();
 void init_menu();
@@ -42,25 +62,7 @@ void state_set_brightness();
 void state_set_beep();
 void state_set_flash();
 
-struct state_t
-{
-    typedef void (*state_fn)();
-
-    state_fn init;
-    state_fn update;
-};
-
-enum class state
-{
-    invalid = -1,
-    off = 0,
-    countdown = 1,
-    menu = 2,
-    set_timer = 3,
-    set_brightness = 4,
-    set_beep = 5,
-    set_flash = 6
-};
+// these must line up with the enum
 
 // clang-format off
 state_t all_states[] =
@@ -69,13 +71,23 @@ state_t all_states[] =
     { init_countdown,           state_countdown },
     { init_menu,                state_menu },
     { null,                     state_set_timer },
-    { null,                     state_set_brightness },      
+    { null,                     state_set_brightness },
     { null,                     state_set_beep },
-    { null,                     state_set_flash } 
+    { null,                     state_set_flash }
 };
 // clang-format on
 
+//////////////////////////////////////////////////////////////////////
+
+volatile uint32 ticks = 0;
+volatile uint32 millis = 0;
+volatile int    rotary_encoder = 0;
+volatile uint32 second_elapsed = 0;
+button_t        button;
+int             knob_rotation = 0;
+
 state_t *current_state = null;
+state_t *next_state = null;
 uint32   state_time = 0;
 uint16   timer_start = 60 * 30;
 uint16   timer_left = 0;
@@ -83,31 +95,63 @@ int      press_time = 0;
 int      beep_threshold = 3;
 int      flash_threshold = 58;
 int      display_brightness = 15;
+int      menu_index = 0;
+uint32   idle_timer = 0;
 
 //////////////////////////////////////////////////////////////////////
+// menu
 
-template<typename T> int flash_load(int id, T const &data)
+// clang-format off
+char const *menu_items[] =
 {
-    return flash::load(id, sizeof(T), (byte *)&data);
-}
+    "SET ",
+    "BRT ",
+    "BEEP",
+    "FLSH",
+    "DONE"
+};
 
-//////////////////////////////////////////////////////////////////////
-
-template<typename T> int flash_save(int id, T const &data)
+state const menu_states[] =
 {
-    return flash::save(id, sizeof(T), (byte *)&data);
-}
+    state::set_timer,
+    state::set_brightness,
+    state::set_beep,
+    state::set_flash,
+    state::countdown
+};
+// clang-format on
 
 //////////////////////////////////////////////////////////////////////
 
 void set_state(state s)
 {
-    current_state = all_states + static_cast<int>(s);
-    if(current_state->init != null)
+    next_state = all_states + static_cast<int>(s);
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void update_state()
+{
+    if(next_state != null)
     {
-        current_state->init();
+        current_state = next_state;
+        next_state = null;
+        if(current_state->init != null)
+        {
+            current_state->init();
+        }
+        state_time = millis;
     }
-    state_time = millis;
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void idle_check()
+{
+    if(millis > idle_timer)
+    {
+        set_state(state::countdown);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -132,7 +176,7 @@ void state_off()
 {
     if(button.pressed)
     {
-        timer_left = timer_start;    // load from flash
+        timer_left = timer_start;
         set_state(state::countdown);
     }
 }
@@ -143,7 +187,7 @@ void init_countdown()
 {
     MOSFET_GPIO_Port->BSRR = MOSFET_Pin;
     max7219_set_wakeup(1);
-    max7219_set_intensity(display_brightness);    // load from flash
+    max7219_set_intensity(display_brightness);
     second_elapsed = millis + 1000;
     press_time = 0;
 }
@@ -172,7 +216,6 @@ int get_display_time(uint16 seconds)
 
 void state_countdown()
 {
-    // do counting down
     if(millis >= second_elapsed)
     {
         second_elapsed = millis + 1000;
@@ -193,54 +236,34 @@ void state_countdown()
         timer_left = max(0, timer_left - 1);
     }
 
-    // long/short press = menu/turn off
+    // rotary encoder changes timer (for this run only)
+    if(knob_rotation != 0)
+    {
+        timer_left = clamp(10, 60 * 60 * 24, timer_left + knob_rotation * 60) / 10 * 10;
+        second_elapsed = millis + 1000;
+    }
+
+    // long press for menu, short press to turn off
     if(button.pressed)
     {
         press_time = millis + 1000;
     }
 
-    // rotary encoder changes timer (for this run only)
-    if(knob_rotation != 0)
+    if(press_time != 0)
     {
-        timer_left = max(10, min(60 * 60 * 24, timer_left + knob_rotation * 60)) / 10 * 10;
-        second_elapsed = millis + 1000;
+        if(button.down && millis > press_time)
+        {
+            set_state(state::menu);
+        }
+        else if(button.released)
+        {
+            set_state(state::off);
+        }
     }
 
     // update the 7 segment display
     max7219_set_number(get_display_time(timer_left));
     max7219_set_dp(1 << 2);
-
-    if(button.down && press_time != 0 && millis > press_time)
-    {
-        set_state(state::menu);
-    }
-    else if(button.released && press_time != 0)
-    {
-        set_state(state::off);
-    }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-char const *menu_items[] = { "SET ", "BRT ", "BEEP", "FLSH", "DONE" };
-
-//////////////////////////////////////////////////////////////////////
-
-state const menu_states[] = { state::set_timer, state::set_brightness, state::set_beep, state::set_flash, state::countdown };
-
-//////////////////////////////////////////////////////////////////////
-
-int    menu_index = 0;
-uint32 idle_timer = 0;
-
-//////////////////////////////////////////////////////////////////////
-
-void idle_check()
-{
-    if(millis > idle_timer)
-    {
-        set_state(state::countdown);
-    }
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -254,7 +277,7 @@ void init_menu()
 
 void state_menu()
 {
-    menu_index = max(0, min(countof(menu_items) - 1, menu_index + knob_rotation));
+    menu_index = clamp(0, countof(menu_items) - 1, menu_index + knob_rotation);
     max7219_set_string(menu_items[menu_index]);
     if(button.pressed)
     {
@@ -273,12 +296,12 @@ void state_set_timer()
 
 void state_set_brightness()
 {
-    display_brightness = max(0, min(15, display_brightness + knob_rotation));
+    display_brightness = clamp(0, 15, display_brightness + knob_rotation);
     max7219_set_intensity(display_brightness);
-    max7219_set_number(display_brightness);
+    max7219_set_number(display_brightness + 1);
     if(button.pressed)
     {
-        flash_save(flash_id_brightness, display_brightness);
+        flash::save(flash_id_brightness, display_brightness);
         set_state(state::menu);
     }
     idle_check();
@@ -288,11 +311,11 @@ void state_set_brightness()
 
 void state_set_beep()
 {
-    beep_threshold = max(0, min(60, beep_threshold + knob_rotation));
+    beep_threshold = clamp(0, 60, beep_threshold + knob_rotation);
     max7219_set_number(beep_threshold);
     if(button.pressed)
     {
-        flash_save(flash_id_beep, beep_threshold);
+        flash::save(flash_id_beep, beep_threshold);
         set_state(state::menu);
     }
     idle_check();
@@ -302,11 +325,11 @@ void state_set_beep()
 
 void state_set_flash()
 {
-    flash_threshold = max(0, min(60, flash_threshold + knob_rotation));
+    flash_threshold = clamp(0, 60, flash_threshold + knob_rotation);
     max7219_set_number(flash_threshold);
     if(button.pressed)
     {
-        flash_save(flash_id_flash, flash_threshold);
+        flash::save(flash_id_flash, flash_threshold);
         set_state(state::menu);
     }
     idle_check();
@@ -366,17 +389,16 @@ extern "C" void user_main()
     // go into 'off' mode
     set_state(state::off);
 
-    flash_load(flash_id_timer, timer_start);
-    flash_load(flash_id_beep, beep_threshold);
-    flash_load(flash_id_brightness, display_brightness);
-    flash_load(flash_id_flash, flash_threshold);
+    flash::load(flash_id_timer, timer_start);
+    flash::load(flash_id_beep, beep_threshold);
+    flash::load(flash_id_brightness, display_brightness);
+    flash::load(flash_id_flash, flash_threshold);
 
     while(true)
     {
         // sleep until an ISR has fired
         __WFI();
 
-        // this will be called, at minimum, every tick (100uS)
         button.update();
         buzzer_update();
         knob_rotation = atomic_exchange(&rotary_encoder, 0);
@@ -386,6 +408,8 @@ extern "C" void user_main()
         {
             idle_timer = millis + 10000;
         }
+
+        update_state();
 
         current_state->update();
 
