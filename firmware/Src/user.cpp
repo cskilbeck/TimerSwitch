@@ -1,8 +1,9 @@
 //////////////////////////////////////////////////////////////////////
-// TODO (chs): menu: set timer
-// TODO (chs): do flasher time
-// TODO (chs): fix flash nvr load/save
 // TODO (chs): why buzzer so quiet?
+//
+// DONE (chs): menu: set timer
+// DONE (chs): do flasher time
+// DONE (chs): fix flash nvr load/save [unlock before save]
 //////////////////////////////////////////////////////////////////////
 
 #include "main.h"
@@ -89,11 +90,11 @@ int             knob_rotation = 0;
 state_t *current_state = null;
 state_t *next_state = null;
 uint32   state_time = 0;
-uint32   timer_start = 60 * 30;
+uint32   timer_start = 30;//60 * 30;
 uint32   timer_left = 0;
 int      press_time = 0;
 int      beep_threshold = 3;
-int      flash_threshold = 58;
+int      flash_threshold = 8;
 int      display_brightness = 15;
 int      menu_index = 0;
 uint32   idle_timer = 0;
@@ -214,6 +215,18 @@ int get_display_time(uint32 seconds)
 
 //////////////////////////////////////////////////////////////////////
 
+uint32 knob_adjust(int t)
+{
+    int delta = 60;
+    if(t >= 60 * 60)
+    {
+        delta = 60 * 10;
+    }
+    return clamp(60, 60 * 60 * 24, t + knob_rotation * delta) / delta * delta;
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void state_countdown()
 {
     if(millis >= second_elapsed)
@@ -239,7 +252,7 @@ void state_countdown()
     // rotary encoder changes timer (for this run only)
     if(knob_rotation != 0)
     {
-        timer_left = clamp(10, 60 * 60 * 24, timer_left + knob_rotation * 60) / 10 * 10;
+        timer_left = knob_adjust(timer_left);
         second_elapsed = millis + 1000;
     }
 
@@ -261,9 +274,10 @@ void state_countdown()
         }
     }
     
-    if(timer_left < flash_threshold)
+    if(timer_left <= flash_threshold)
     {
-        max7219_set_wakeup(((millis % 1000) > 250) ? 1 : 0);
+        int frac = second_elapsed - millis;
+        max7219_set_wakeup((frac > 250) ? 1 : 0);
     }
 
     // update the 7 segment display
@@ -297,12 +311,14 @@ void state_menu()
 void state_set_timer()
 {
     idle_check();
-    timer_start = clamp(10, 60 * 60 * 24, timer_start + knob_rotation * 60) / 10 * 10;
+    timer_start = knob_adjust(timer_start);
     max7219_set_number(get_display_time(timer_start));
     max7219_set_dp(1 << 2);
     if(button.pressed)
     {
+        flash::unlock();
         flash::save(flash_id_timer, timer_start);
+        flash::lock();
         set_state(state::menu);
     }
 }
@@ -317,7 +333,9 @@ void state_set_brightness()
     max7219_set_number(display_brightness + 1);
     if(button.pressed)
     {
+        flash::unlock();
         flash::save(flash_id_brightness, display_brightness);
+        flash::lock();
         set_state(state::menu);
     }
 }
@@ -331,7 +349,9 @@ void state_set_beep()
     max7219_set_number(beep_threshold);
     if(button.pressed)
     {
+        flash::unlock();
         flash::save(flash_id_beep, beep_threshold);
+        flash::lock();
         set_state(state::menu);
     }
 }
@@ -345,7 +365,9 @@ void state_set_flash()
     max7219_set_number(flash_threshold);
     if(button.pressed)
     {
+        flash::unlock();
         flash::save(flash_id_flash, flash_threshold);
+        flash::lock();
         set_state(state::menu);
     }
 }
