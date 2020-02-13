@@ -166,9 +166,8 @@ int state_time_elapsed()
 
 void init_off()
 {
-    MOSFET_GPIO_Port->BRR = MOSFET_Pin;
+    gpio_clear(MOSFET_GPIO_Port, MOSFET_Pin);
     max7219_set_wakeup(0);
-    max7219_set_intensity(15);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -186,7 +185,7 @@ void state_off()
 
 void init_countdown()
 {
-    MOSFET_GPIO_Port->BSRR = MOSFET_Pin;
+    gpio_set(MOSFET_GPIO_Port, MOSFET_Pin);
     max7219_set_wakeup(1);
     max7219_set_intensity(display_brightness);
     second_elapsed = millis + 1000;
@@ -277,7 +276,7 @@ void state_countdown()
     if(timer_left <= flash_threshold)
     {
         int frac = second_elapsed - millis;
-        max7219_set_wakeup((frac > 500) ? 0 : 1);
+        max7219_set_wakeup((frac < 500) ? 1 : 0);
     }
 
     // update the 7 segment display
@@ -308,19 +307,26 @@ void state_menu()
 
 //////////////////////////////////////////////////////////////////////
 
+template <typename T> void save_var(int id, T const &var)
+{
+    flash::unlock();
+    flash::save(id, var);
+    flash::lock();
+}
+
+//////////////////////////////////////////////////////////////////////
+
 void state_set_timer()
 {
     idle_check();
     timer_start = knob_adjust(timer_start);
-    max7219_set_number(get_display_time(timer_start));
-    max7219_set_dp(1 << 2);
     if(button.pressed)
     {
-        flash::unlock();
-        flash::save(flash_id_timer, timer_start);
-        flash::lock();
+        save_var(flash_id_timer, timer_start);
         set_state(state::menu);
     }
+    max7219_set_number(get_display_time(timer_start));
+    max7219_set_dp(1 << 2);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -329,15 +335,13 @@ void state_set_brightness()
 {
     idle_check();
     display_brightness = clamp(0, 15, display_brightness + knob_rotation);
-    max7219_set_intensity(display_brightness);
-    max7219_set_number(display_brightness + 1, 0);
     if(button.pressed)
     {
-        flash::unlock();
-        flash::save(flash_id_brightness, display_brightness);
-        flash::lock();
+        save_var(flash_id_brightness, display_brightness);
         set_state(state::menu);
     }
+    max7219_set_intensity(display_brightness);
+    max7219_set_number(display_brightness + 1, 0);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -346,14 +350,12 @@ void state_set_beep()
 {
     idle_check();
     beep_threshold = clamp(0, 60, beep_threshold + knob_rotation);
-    max7219_set_number(beep_threshold, 0);
     if(button.pressed)
     {
-        flash::unlock();
-        flash::save(flash_id_beep, beep_threshold);
-        flash::lock();
+        save_var(flash_id_beep, beep_threshold);
         set_state(state::menu);
     }
+    max7219_set_number(beep_threshold, 0);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -362,14 +364,12 @@ void state_set_flash()
 {
     idle_check();
     flash_threshold = clamp(0, 60, flash_threshold + knob_rotation);
-    max7219_set_number(flash_threshold, 0);
     if(button.pressed)
     {
-        flash::unlock();
-        flash::save(flash_id_flash, flash_threshold);
-        flash::lock();
+        save_var(flash_id_flash, flash_threshold);
         set_state(state::menu);
     }
+    max7219_set_number(flash_threshold, 0);
 }
 
 //////////////////////////////////////////////////////////////////////

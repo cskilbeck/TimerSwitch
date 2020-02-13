@@ -80,7 +80,7 @@ uint16_t setup_packet[8] = {
     set_scan_limit(3),
     set_decode_mode(0),
     set_intensity(15),
-    set_wakeup(1),
+    set_wakeup(0),
     set_digit(0, 0x55),
     set_digit(1, 0xaa),
     set_digit(2, 0x00),
