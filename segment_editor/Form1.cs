@@ -137,36 +137,42 @@ namespace segment_editor
                     string filename = openFileDialog1.FileName;
                     using(StreamReader f = new StreamReader(filename))
                     {
-                        /*
-                        00...
-                        */
                         string s = f.ReadLine();
+                        if (string.IsNullOrEmpty(s))
+                        {
+                            MessageBox.Show($"Error loading {filename} - invalid format");
+                            return;
+                        }
                         string header = s.Substring(0, ident_string.Length);
                         if(header.CompareTo(ident_string) != 0)
                         {
                             MessageBox.Show($"Error loading {filename} - ident not found", "Load File", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
                         }
-                        else
+                        string data = s.Substring(ident_string.Length);
+                        if(data.Length != 256)
                         {
-                            string data = s.Substring(ident_string.Length);
-                            if(data.Length != 256)
+                            MessageBox.Show($"Error loading {filename} - data wrong length", "Load File", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            return;
+                        }
+                        byte[] loaded = new byte[128];
+                        bool valid = true;
+                        for(int i = 0; i<128; ++i)
+                        {
+                            int x;
+                            if(!int.TryParse(data.Substring(i * 2, 2), System.Globalization.NumberStyles.HexNumber, CultureInfo.InvariantCulture, out x))
                             {
-                                MessageBox.Show($"Error loading {filename} - data wrong length", "Load File", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                MessageBox.Show($"Error loading {filename} - bad data format at entry {i}", "Load File", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                valid = false;
+                                break;
                             }
-                            else
-                            {
-                                for(int i = 0; i<128; ++i)
-                                {
-                                    if(int.TryParse(data.Substring(i * 2, 2), System.Globalization.NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int x))
-                                    {
-                                        bitmaps[i] = rbit((byte)x);
-                                    }
-                                    else
-                                    {
-                                        MessageBox.Show($"Error loading {filename} - bad data format at entry {i}", "Load File", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    }
-                                }
-                            }
+                            loaded[i] = rbit((byte)x);
+                        }
+                        if (valid)
+                        {
+                            Array.Copy(loaded, 0, bitmaps, 0, 128);
+                            listBox1.SelectedIndex = '1';
+                            listBox1.SelectedIndex = '0';
                         }
                     }
                 }
