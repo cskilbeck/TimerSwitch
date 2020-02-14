@@ -33,7 +33,7 @@ namespace segment_editor
             byte s = state;
             for(int i = 0; i<7; ++i)
             {
-                buttons[i].BackColor = ((s & 1) != 0) ? Color.Red : Color.Black;
+                buttons[i].BackColor = ((s & 1) != 0) ? Color.Red : Color.FromArgb(32, 32, 32);
                 s >>= 1;
             }
         }
@@ -46,7 +46,7 @@ namespace segment_editor
             byte bit = (byte)(1u << id);
             state ^= bit;
             bool on = (state & bit) == 0;
-            Color c = on ? Color.Black : Color.Red;
+            Color c = on ? Color.FromArgb(32,32,32) : Color.Red;
             b.BackColor = c;
             StringBuilder value_string = new StringBuilder();
             for(int i = 0; i<7; ++i)
