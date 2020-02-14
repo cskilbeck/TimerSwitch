@@ -89,7 +89,6 @@ int             knob_rotation = 0;
 
 state_t *current_state = null;
 state_t *next_state = null;
-uint32   state_time = 0;
 uint32   timer_start = 30;//60 * 30;
 uint32   timer_left = 0;
 int      press_time = 0;
@@ -123,6 +122,7 @@ state const menu_states[] =
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////
+// tee up next state
 
 void set_state(state s)
 {
@@ -130,6 +130,7 @@ void set_state(state s)
 }
 
 //////////////////////////////////////////////////////////////////////
+// transition to next state if requested
 
 void update_state()
 {
@@ -141,11 +142,11 @@ void update_state()
         {
             current_state->init();
         }
-        state_time = millis;
     }
 }
 
 //////////////////////////////////////////////////////////////////////
+// go back to countdown state if no user input for some time
 
 void idle_check()
 {
@@ -156,43 +157,7 @@ void idle_check()
 }
 
 //////////////////////////////////////////////////////////////////////
-
-int state_time_elapsed()
-{
-    return millis - state_time;
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void init_off()
-{
-    gpio_clear(MOSFET_GPIO_Port, MOSFET_Pin);
-    max7219_set_wakeup(0);
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void state_off()
-{
-    if(button.pressed)
-    {
-        timer_left = timer_start;
-        set_state(state::countdown);
-    }
-}
-
-//////////////////////////////////////////////////////////////////////
-
-void init_countdown()
-{
-    gpio_set(MOSFET_GPIO_Port, MOSFET_Pin);
-    max7219_set_wakeup(1);
-    max7219_set_intensity(display_brightness);
-    second_elapsed = millis + 1000;
-    press_time = 0;
-}
-
-//////////////////////////////////////////////////////////////////////
+// if < 1hr, minutes.seconds else hours.minutes
 
 int get_display_time(uint32 seconds)
 {
@@ -213,18 +178,73 @@ int get_display_time(uint32 seconds)
 }
 
 //////////////////////////////////////////////////////////////////////
+// change a time value by the rotary encoder
 
 uint32 knob_adjust(int t)
 {
+    // adjust by one minute per detent
     int delta = 60;
+
+    // or 10 minutes per detent if time > 1 hr
     if(t >= 60 * 60)
     {
         delta = 60 * 10;
     }
+    // clamp at 1min <= T <= 24hrs
     return clamp(60, 60 * 60 * 24, t + knob_rotation * delta) / delta * delta;
 }
 
 //////////////////////////////////////////////////////////////////////
+// save a var to nvflash
+
+template <typename T> void save_var(int id, T const &var)
+{
+    flash::unlock();
+    flash::save(id, var);
+    flash::lock();
+}
+
+//////////////////////////////////////////////////////////////////////
+// STATE HANDLERS
+
+//////////////////////////////////////////////////////////////////////
+// init_off - turn off relay and display
+
+void init_off()
+{
+    gpio_clear(MOSFET_GPIO_Port, MOSFET_Pin);
+    max7219_set_wakeup(0);
+}
+
+//////////////////////////////////////////////////////////////////////
+// state_off - button press wakes up into countdown mode with fresh timer
+
+void state_off()
+{
+    if(button.pressed)
+    {
+        timer_left = timer_start;
+        set_state(state::countdown);
+    }
+}
+
+//////////////////////////////////////////////////////////////////////
+// init_countdown - turn on relay and display and prepare to countdown seconds
+
+void init_countdown()
+{
+    gpio_set(MOSFET_GPIO_Port, MOSFET_Pin);
+    max7219_set_wakeup(1);
+    max7219_set_intensity(display_brightness);
+    second_elapsed = millis + 1000;
+    press_time = 0;
+}
+
+//////////////////////////////////////////////////////////////////////
+// state_countdown
+// decrement timer in minutes
+// allow timer adjust
+// watch for short press (off) or long press (menu)
 
 void state_countdown()
 {
@@ -285,6 +305,7 @@ void state_countdown()
 }
 
 //////////////////////////////////////////////////////////////////////
+// init_menu - reset menu item and switch on display (in case it was flashing)
 
 void init_menu()
 {
@@ -293,6 +314,7 @@ void init_menu()
 }
 
 //////////////////////////////////////////////////////////////////////
+// state_menu - show menu options, button chooses one
 
 void state_menu()
 {
@@ -306,15 +328,7 @@ void state_menu()
 }
 
 //////////////////////////////////////////////////////////////////////
-
-template <typename T> void save_var(int id, T const &var)
-{
-    flash::unlock();
-    flash::save(id, var);
-    flash::lock();
-}
-
-//////////////////////////////////////////////////////////////////////
+// state_set_timer - setup reset time value
 
 void state_set_timer()
 {
@@ -330,6 +344,7 @@ void state_set_timer()
 }
 
 //////////////////////////////////////////////////////////////////////
+// state_set_brightness - set led brightness 0..15
 
 void state_set_brightness()
 {
@@ -345,6 +360,7 @@ void state_set_brightness()
 }
 
 //////////////////////////////////////////////////////////////////////
+// state_set_beep - set beep threshold in seconds
 
 void state_set_beep()
 {
@@ -359,6 +375,7 @@ void state_set_beep()
 }
 
 //////////////////////////////////////////////////////////////////////
+// state_set_flash - set flash threshold in seconds
 
 void state_set_flash()
 {
