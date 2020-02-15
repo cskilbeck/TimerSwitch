@@ -1,6 +1,6 @@
 //////////////////////////////////////////////////////////////////////
-// TODO (chs): why buzzer so quiet?
 //
+// DONE (chs): why buzzer so quiet? [because volume set low...]
 // DONE (chs): menu: set timer
 // DONE (chs): do flasher time
 // DONE (chs): fix flash nvr load/save [unlock before save]
