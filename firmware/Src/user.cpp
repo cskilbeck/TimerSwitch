@@ -414,8 +414,8 @@ extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 extern "C" void HAL_GPIO_EXTI_Callback(uint16 GPIO_Pin)
 {
-    int a = gpio_get(ROTARYA_GPIO_Port, ROTARYA_Pin) ? 2 : 0;
-    int b = gpio_get(ROTARYB_GPIO_Port, ROTARYB_Pin) ? 1 : 0;
+    int a = gpio_get(ROTARYA_GPIO_Port, ROTARYA_Pin) ? 1 : 0;
+    int b = gpio_get(ROTARYB_GPIO_Port, ROTARYB_Pin) ? 2 : 0;
     rotary_encoder += rotary_update(a | b);
 }
 
@@ -431,11 +431,11 @@ extern "C" void user_main()
     HAL_TIM_Base_Start_IT(&htim14);
 
     // start buzzer PWM timer
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-    HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+    //HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+    //HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
 
     // but then turn the buzzer off
-    set_buzzer_state(false);
+    //set_buzzer_state(false);
 
     // setup the 7 segment display
     max7219_init(&hspi1);
@@ -452,9 +452,12 @@ extern "C" void user_main()
     {
         // sleep until an ISR has fired
         __WFI();
+        
+        gpio_toggle(DEBUG1_GPIO_Port, DEBUG1_Pin);
+        gpio_toggle(DEBUG2_GPIO_Port, DEBUG2_Pin);
 
         button.update();
-        buzzer_update();
+        //buzzer_update();
         knob_rotation = atomic_exchange(&rotary_encoder, 0);
 
         // afk timer

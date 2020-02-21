@@ -157,7 +157,7 @@ void max7219_set_intensity(int x)
 
 __volatile__ void max7219_set_dp(int x)
 {
-    uint16 *p = setup_packet + setup_digit0;
+    uint16 *p = setup_packet + setup_digit3;
     x <<= 7;
     for(int i=0; i<4; ++i)
     {
@@ -167,7 +167,7 @@ __volatile__ void max7219_set_dp(int x)
             *p = n;
             dirty = true;
         }
-        p += 1;
+        p -= 1;
         x >>= 1;
     }
 }
@@ -178,7 +178,7 @@ void max7219_set_string(char const *p)
 {
     for(int i=0; i<4; ++i)
     {
-        set_entry(setup_digit3 - i, 0xff, max_Digit3 - i, ascii_to_segments(p[i]));
+        set_entry(setup_digit0 + i, 0xff, max_Digit0 + i, ascii_to_segments(p[i]));
     }
 }
 
@@ -190,7 +190,7 @@ void max7219_set_number(uint x, int leading)
     int i;
     for(i = 0; i < 4; ++i)
     {
-        set_entry(setup_digit0 + i, 0xff, max_Digit0 + i, seg_digits[x % 10]);
+        set_entry(setup_digit3 - i, 0xff, max_Digit3 - i, seg_digits[x % 10]);
         x /= 10;
         if(x == 0 && i >= leading)
         {
@@ -199,7 +199,7 @@ void max7219_set_number(uint x, int leading)
     }
     for(i += 1; i < 4; ++i)
     {
-        set_entry(setup_digit0 + i, 0xff, max_Digit0 + i, 0);
+        set_entry(setup_digit3 - i, 0xff, max_Digit3 - i, 0);
     }
 }
 
