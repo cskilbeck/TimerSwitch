@@ -414,8 +414,8 @@ extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 extern "C" void HAL_GPIO_EXTI_Callback(uint16 GPIO_Pin)
 {
-    int a = gpio_get(ROTARYA_GPIO_Port, ROTARYA_Pin) ? 1 : 0;
-    int b = gpio_get(ROTARYB_GPIO_Port, ROTARYB_Pin) ? 2 : 0;
+    int a = gpio_get(ROTARYA_GPIO_Port, ROTARYA_Pin) ? 2 : 0;
+    int b = gpio_get(ROTARYB_GPIO_Port, ROTARYB_Pin) ? 1 : 0;
     rotary_encoder += rotary_update(a | b);
 }
 
