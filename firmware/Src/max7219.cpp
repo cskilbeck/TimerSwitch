@@ -65,17 +65,14 @@ uint8_t const seg_digits[16] = { _SL(2) + _SL(3) + _SL(4) + _SL(5) + _SL(6) + _S
 // offsets into setup_packet[]
 enum
 {
-    setup_base = 0,
-    setup_intensity = 3,
-    setup_wakeup = 4,
-    setup_digit0 = 5,
-    setup_digit3 = 8,
-
-    setup_count = 9
+    offset_intensity = 3,
+    offset_wakeup = 4,
+    offset_digit0 = 5,
+    offset_digit3 = 8,
 };
 
 // clang-format off
-uint16_t setup_packet[setup_count] = {
+uint16_t setup_packet[] = {
     set_display_test(0),
     set_scan_limit(3),
     set_decode_mode(0),
@@ -117,13 +114,13 @@ static void set_entry(int index, int mask, int addr, int value)
 //////////////////////////////////////////////////////////////////////
 // send setup_packet[] from some offset
 
-static void transmit_dma(int n)
+static void transmit_dma()
 {
     while(hdma_spi1_tx.State == HAL_DMA_STATE_BUSY)
     {
         // toggle debug line here to see if it's stalling
     }
-    HAL_SPI_Transmit_DMA(max_spi_handle, (uint8_t *)(setup_packet + n), setup_count - n);
+    HAL_SPI_Transmit_DMA(max_spi_handle, (uint8_t *)(setup_packet), countof(setup_packet));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -132,7 +129,7 @@ static void transmit_dma(int n)
 void max7219_init(SPI_HandleTypeDef *spi_handle)
 {
     max_spi_handle = spi_handle;
-    transmit_dma(setup_base);
+    transmit_dma();
     dirty = false;
 }
 
@@ -141,7 +138,7 @@ void max7219_init(SPI_HandleTypeDef *spi_handle)
 
 void max7219_set_wakeup(int x)
 {
-    set_entry(setup_wakeup, 0x1, max_WakeUp, x);
+    set_entry(offset_wakeup, 0x1, max_WakeUp, x);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -149,7 +146,7 @@ void max7219_set_wakeup(int x)
 
 void max7219_set_intensity(int x)
 {
-    set_entry(setup_intensity, 0xf, max_Intensity, x);
+    set_entry(offset_intensity, 0xf, max_Intensity, x);
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -157,7 +154,7 @@ void max7219_set_intensity(int x)
 
 __volatile__ void max7219_set_dp(int x)
 {
-    uint16 *p = setup_packet + setup_digit3;
+    uint16 *p = setup_packet + offset_digit3;
     x <<= 7;
     for(int i=0; i<4; ++i)
     {
@@ -178,7 +175,7 @@ void max7219_set_string(char const *p)
 {
     for(int i=0; i<4; ++i)
     {
-        set_entry(setup_digit0 + i, 0xff, max_Digit0 + i, ascii_to_segments(p[i]));
+        set_entry(offset_digit0 + i, 0xff, max_Digit0 + i, ascii_to_segments(p[i]));
     }
 }
 
@@ -190,7 +187,7 @@ void max7219_set_number(uint x, int leading)
     int i;
     for(i = 0; i < 4; ++i)
     {
-        set_entry(setup_digit3 - i, 0xff, max_Digit3 - i, seg_digits[x % 10]);
+        set_entry(offset_digit3 - i, 0xff, max_Digit3 - i, seg_digits[x % 10]);
         x /= 10;
         if(x == 0 && i >= leading)
         {
@@ -199,7 +196,7 @@ void max7219_set_number(uint x, int leading)
     }
     for(i += 1; i < 4; ++i)
     {
-        set_entry(setup_digit3 - i, 0xff, max_Digit3 - i, 0);
+        set_entry(offset_digit3 - i, 0xff, max_Digit3 - i, 0);
     }
 }
 
@@ -210,7 +207,7 @@ void max7219_set_hex(int x)
 {
     for(int i = 0; i < 4; ++i)
     {
-        set_entry(setup_digit0 + i, 0xff, max_Digit0 + 1, seg_digits[x & 0xf]);
+        set_entry(offset_digit0 + i, 0xff, max_Digit0 + 1, seg_digits[x & 0xf]);
         x >>= 4;
     }
 }
@@ -222,7 +219,7 @@ void max7219_update()
 {
     if(dirty)
     {
-        transmit_dma(setup_base);
+        transmit_dma();
         dirty = false;
     }
 }
