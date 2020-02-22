@@ -32,6 +32,7 @@
 #define set_wakeup(x) set(WakeUp, (x))
 #define set_decode_mode(x) set(DecodeMode, (x))
 #define set_digit(x, y) set(Digit##x, (y))
+#define set_display_test(x) set(DisplayTest, (x))
 
 //////////////////////////////////////////////////////////////////////
 // hex digit lokup table
@@ -65,18 +66,17 @@ uint8_t const seg_digits[16] = { _SL(2) + _SL(3) + _SL(4) + _SL(5) + _SL(6) + _S
 enum
 {
     setup_base = 0,
-    setup_update = 2,
+    setup_intensity = 3,
+    setup_wakeup = 4,
+    setup_digit0 = 5,
+    setup_digit3 = 8,
 
-    setup_intensity = 2,
-    setup_wakeup = 3,
-    setup_digit0 = 4,
-    setup_digit3 = 7,
-
-    setup_count = 8
+    setup_count = 9
 };
 
 // clang-format off
-uint16_t setup_packet[8] = {
+uint16_t setup_packet[setup_count] = {
+    set_display_test(0),
     set_scan_limit(3),
     set_decode_mode(0),
     set_intensity(15),
@@ -222,7 +222,7 @@ void max7219_update()
 {
     if(dirty)
     {
-        transmit_dma(setup_update);
+        transmit_dma(setup_base);
         dirty = false;
     }
 }
