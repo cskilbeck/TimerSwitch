@@ -66,10 +66,10 @@ uint8_t const seg_digits[16] = { _SL(2) + _SL(3) + _SL(4) + _SL(5) + _SL(6) + _S
 enum
 {
     setup_base = 0,
-    setup_intensity = 2,
-    setup_wakeup = 3,
-    setup_digit0 = 4,
-    setup_digit3 = 7,
+    setup_intensity = 3,
+    setup_wakeup = 4,
+    setup_digit0 = 5,
+    setup_digit3 = 8,
 
     setup_count = 9
 };
@@ -178,7 +178,7 @@ void max7219_set_string(char const *p)
 {
     for(int i=0; i<4; ++i)
     {
-        set_entry(setup_digit3 - i, 0xff, max_Digit3 - i, ascii_to_segments(p[i]));
+        set_entry(setup_digit3 - i, 0xff, max_Digit0 + i, ascii_to_segments(p[i]));
     }
 }
 
@@ -190,7 +190,7 @@ void max7219_set_number(uint x, int leading)
     int i;
     for(i = 0; i < 4; ++i)
     {
-        set_entry(setup_digit0 + i, 0xff, max_Digit0 + i, seg_digits[x % 10]);
+        set_entry(setup_digit0 + i, 0xff, max_Digit3 - i, seg_digits[x % 10]);
         x /= 10;
         if(x == 0 && i >= leading)
         {
@@ -199,7 +199,7 @@ void max7219_set_number(uint x, int leading)
     }
     for(i += 1; i < 4; ++i)
     {
-        set_entry(setup_digit0 + i, 0xff, max_Digit0 + i, 0);
+        set_entry(setup_digit0 + i, 0xff, max_Digit3 - i, 0);
     }
 }
 
@@ -210,7 +210,7 @@ void max7219_set_hex(int x)
 {
     for(int i = 0; i < 4; ++i)
     {
-        set_entry(setup_digit0 + i, 0xff, max_Digit0 + 1, seg_digits[x & 0xf]);
+        set_entry(setup_digit0 + i, 0xff, max_Digit3 - i, seg_digits[x & 0xf]);
         x >>= 4;
     }
 }
