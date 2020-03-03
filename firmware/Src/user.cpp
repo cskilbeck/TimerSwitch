@@ -89,7 +89,7 @@ int             knob_rotation = 0;
 
 state_t *current_state = null;
 state_t *next_state = null;
-uint32   timer_start = 30;//60 * 30;
+uint32   timer_start = 30;    // 60 * 30;
 uint32   timer_left = 0;
 int      press_time = 0;
 int      beep_threshold = 3;

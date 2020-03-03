@@ -15,7 +15,7 @@ uint32 buzzer_off = 0;
 
 //////////////////////////////////////////////////////////////////////
 // 0..256
-                      
+
 void set_buzzer_volume(int x)
 {
     buzzer_volume = x;
@@ -79,4 +79,3 @@ void buzzer_update()
         buzzer_off = 0;
     }
 }
-

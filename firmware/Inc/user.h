@@ -92,7 +92,7 @@ inline uint32 gpio_get(GPIO_TypeDef *gpio, uint32 pins)
 //////////////////////////////////////////////////////////////////////
 
 void *__builtin_memcpy(void *destination, void const *source, size_t num);
-int _builtin_memcmp(void const *ptr1, void const *ptr2, size_t num);
+int   _builtin_memcmp(void const *ptr1, void const *ptr2, size_t num);
 
 #define memcpy __builtin_memcpy
 #define memcmp __builtin_memcmp
@@ -122,7 +122,7 @@ inline int max(int x, int y)
 
 inline int clamp(int low, int high, int value)
 {
-    return(max(low, min(high, value)));
+    return (max(low, min(high, value)));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -144,10 +144,10 @@ template <typename T, uint32 N> static constexpr inline uint32 countof(T const (
 inline int atomic_exchange(int volatile *addr, int new_value)
 {
     __disable_irq();
- 	int ret = *addr;
+    int ret = *addr;
     *addr = new_value;
     __enable_irq();
     return ret;
 }
 
-#endif // __cplusplus
+#endif    // __cplusplus

@@ -26,7 +26,7 @@ uint8_t    store = 0;
 // 11 .. 10 .. 00 is one way
 // 00 .. 10 .. 11 is the other way
 
-// So:  
+// So:
 // E8 = 11,10 .. 10,00  --> one way
 // 2B = 00,10 .. 10,11  <-- other way
 

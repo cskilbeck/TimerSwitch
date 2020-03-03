@@ -48,7 +48,7 @@ struct button_t
 
     // was it pressed since last update()
     bool pressed;
-    
+
     // was it released since last update()
     bool released;
 

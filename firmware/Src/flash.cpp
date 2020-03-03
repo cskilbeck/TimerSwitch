@@ -27,7 +27,7 @@ static byte test_area[FLASH_PAGE_SIZE * 2];
 
 //////////////////////////////////////////////////////////////////////
 // notes
-// should work on most 32 bit STM32 medium density devices, only tested on STM32F103C8T6
+// should work on most 32 bit STM32 medium density devices, only tested on STM32F103C8T6 & STM32F030F4P6
 // it's all synchronous
 // error checking is very basic, it just aborts the operation if it sees an error
 //
@@ -35,7 +35,7 @@ static byte test_area[FLASH_PAGE_SIZE * 2];
 //
 // define these 2 variables to set the area used for storage
 static int const page_size = FLASH_PAGE_SIZE;                            // usually 1K or 2K
-static uint16_t *page_base = (uint16_t *)(FLASH_BASE + FLASH_OFFSET);    // this puts your 2 pages at 64k into the flash
+static uint16_t *page_base = (uint16_t *)(FLASH_BASE + FLASH_OFFSET);    // this puts your 2 pages somewhere in the flash area
 //
 // define these functions to interface with the hardware (see versions for STM32F1xB medium density at the end of this file)
 //

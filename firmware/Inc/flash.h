@@ -1,11 +1,13 @@
 #pragma once
 
-namespace flash {
+namespace flash
+{
 
 //////////////////////////////////////////////////////////////////////
 // flash functions return one of these, only ok (0) means success
 
-enum {
+enum
+{
     ok = 0,             // flash function succeeded
     bad_id = 1,         // a bad id was passed in (can't be 0xff)
     not_found = 2,      // couldn't find a variable to load
@@ -54,14 +56,14 @@ int save(byte id, byte len, byte *data);
 
 #ifdef __cplusplus
 
-template<typename T> int load(int id, T const &data)
+template <typename T> int load(int id, T const &data)
 {
     return flash::load(id, sizeof(T), (byte *)&data);
 }
 
 //////////////////////////////////////////////////////////////////////
 
-template<typename T> int save(int id, T const &data)
+template <typename T> int save(int id, T const &data)
 {
     return flash::save(id, sizeof(T), (byte *)&data);
 }
@@ -76,4 +78,3 @@ char const *error_message(int code);
 int dump(int page);
 
 }    // namespace flash
-

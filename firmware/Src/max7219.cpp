@@ -159,7 +159,7 @@ __volatile__ void max7219_set_dp(int x)
 {
     uint16 *p = setup_packet + setup_digit0;
     x <<= 7;
-    for(int i=0; i<4; ++i)
+    for(int i = 0; i < 4; ++i)
     {
         uint16 n = (*p & 0xff7f) | (x & 0x80);
         if(n != *p)
@@ -173,10 +173,11 @@ __volatile__ void max7219_set_dp(int x)
 }
 
 //////////////////////////////////////////////////////////////////////
+// public function: set ascii string, must be 4 bytes long
 
 void max7219_set_string(char const *p)
 {
-    for(int i=0; i<4; ++i)
+    for(int i = 0; i < 4; ++i)
     {
         set_entry(setup_digit3 - i, 0xff, max_Digit0 + i, ascii_to_segments(p[i]));
     }
