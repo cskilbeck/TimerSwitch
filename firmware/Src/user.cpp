@@ -271,6 +271,7 @@ void state_countdown()
     // rotary encoder changes timer (for this run only)
     if(knob_rotation != 0)
     {
+        max7219_set_wakeup(1);
         timer_left = knob_adjust(timer_left);
         second_elapsed = millis + 1000;
     }
